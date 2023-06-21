@@ -72,6 +72,42 @@ video {
     max-width: 100%;
 }
 
+/* Layout: Graphics */
+
+.left {
+    float: left;
+    margin-inline: 0 1rem;
+    max-width: 50%;
+}
+
+.right {
+    float: right;
+    margin-inline: 1rem 0;
+    max-width: 50%;
+}
+
+@media screen and (max-width: 40rem) {
+    .left,
+    .right {
+        float: none;
+        margin: 0;
+        max-width: 100%;
+    }
+}
+
+.clear {
+    clear: both;
+}
+
+.headline {
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.fullwidth {
+    width: 100%;
+}
+
 /* # nav */
 
 nav {
@@ -81,6 +117,12 @@ nav {
     padding-inline: 2rem;
     gap: 2rem;
     border-bottom: 1px solid var(--background-color-2);
+}
+
+/* #profile-picture */
+#profile-picture {
+    clip-path: circle(40%);
+    scale: 1.2;
 }
 
 /* .gallery */
@@ -127,3 +169,4 @@ nav {
 .gallery figcaption :first-child {
     margin-block-start: 0.25rem;
 }
+
