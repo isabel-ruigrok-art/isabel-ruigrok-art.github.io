@@ -12,6 +12,12 @@
 
 /* Text */
 
+@media screen and (min-width: 40rem) {
+    :root {
+        font-size: calc(1rem + 0.5vw);
+    }
+}
+
 body {
     background-color: var(--background-color-1);
     color: var(--text-color-1);
