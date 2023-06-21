@@ -5,9 +5,9 @@
     --text-color-1: #657b83;
     --text-color-2: #586e75;
     --shadow-color: #cccccc;
-    --font-sans: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
-    --font-serif: ui-serif,serif;
-    --font-mono: Dank Mono,Operator Mono,Inconsolata,Fira Mono,ui-monospace,SF Mono,Monaco,Droid Sans Mono,Source Code Pro,monospace;
+    --font-sans: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif;
+    --font-serif: ui-serif, serif;
+    --font-mono: Dank Mono, Operator Mono, Inconsolata, Fira Mono, ui-monospace, SF Mono, Monaco, Droid Sans Mono, Source Code Pro, monospace;
 }
 
 /* Text */
@@ -48,6 +48,11 @@ a:hover {
 
 /* Layout */
 
+:where(h1, h2, h3, h4, h5, h6):last-child {
+    margin-block-end: 0;
+}
+
+
 section, nav, footer {
     width: clamp(18rem, 90%, 800px);
     margin-inline: auto;
@@ -76,4 +81,49 @@ nav {
     padding-inline: 2rem;
     gap: 2rem;
     border-bottom: 1px solid var(--background-color-2);
+}
+
+/* .gallery */
+
+.gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.gallery>* {
+    flex: 1 1 calc(max(10rem, 30%));
+    height: fit-content;
+    color: inherit;
+}
+
+.gallery figure {
+    padding: 0;
+    background: var(--background-color-2);
+    border-radius: 0.5rem;
+    transition: box-shadow 0.5s ease-in-out;
+    margin: 0;
+}
+
+.gallery>*:hover>figure {
+    box-shadow: var(--shadow-color) 0 0 0.5rem;
+}
+
+.gallery>*.wide {
+    flex: 1 1 calc(max(10rem, 60%));
+}
+
+.gallery img {
+    width: 100%;
+    height: auto;
+}
+
+.gallery figcaption {
+    padding: 0 1rem 0.5rem 1rem;
+    text-align: center;
+}
+
+.gallery figcaption :first-child {
+    margin-block-start: 0.25rem;
 }
