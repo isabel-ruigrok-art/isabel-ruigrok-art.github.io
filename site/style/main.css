@@ -48,6 +48,11 @@ a:hover {
 
 /* Layout */
 
+body {
+    width: 100%;
+    margin: 0;
+}
+
 :where(h1, h2, h3, h4, h5, h6):last-child {
     margin-block-end: 0;
 }
