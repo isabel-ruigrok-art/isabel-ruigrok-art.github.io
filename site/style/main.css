@@ -10,6 +10,8 @@
     --font-mono: Dank Mono,Operator Mono,Inconsolata,Fira Mono,ui-monospace,SF Mono,Monaco,Droid Sans Mono,Source Code Pro,monospace;
 }
 
+/* Text */
+
 body {
     background-color: var(--background-color-1);
     color: var(--text-color-1);
@@ -36,4 +38,25 @@ a {
 
 a:hover {
     text-decoration-line: underline;
+}
+
+/* Layout */
+
+section, nav, footer {
+    width: clamp(18rem, 90%, 800px);
+    margin-inline: auto;
+}
+
+section {
+    clear: both;
+    padding-block-start: 1rem;
+}
+
+section:first-of-type {
+    padding-block-start: 0;
+}
+
+img,
+video {
+    max-width: 100%;
 }
