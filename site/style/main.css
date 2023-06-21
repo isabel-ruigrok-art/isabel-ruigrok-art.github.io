@@ -60,3 +60,14 @@ img,
 video {
     max-width: 100%;
 }
+
+/* # nav */
+
+nav {
+    font-weight: 600;
+    display: flex;
+    padding-block: 0.5rem;
+    padding-inline: 2rem;
+    gap: 2rem;
+    border-bottom: 1px solid var(--background-color-2);
+}
