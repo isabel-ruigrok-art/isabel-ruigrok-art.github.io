@@ -1,0 +1,9 @@
+runtime: python311
+
+handlers:
+- url: /
+  static_files: site/index.html
+  upload: site/index.html
+
+- url: /
+  static_dir: site/
