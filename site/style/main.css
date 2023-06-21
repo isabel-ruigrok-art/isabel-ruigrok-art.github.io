@@ -72,6 +72,10 @@ section:first-of-type {
     padding-block-start: 0;
 }
 
+section.extrawide {
+    width: clamp(18rem, 90%, 90%);
+}
+
 img,
 video {
     max-width: 100%;
@@ -140,7 +144,7 @@ nav {
 }
 
 .gallery>* {
-    flex: 1 1 calc(max(10rem, 30%));
+    flex: 1 1 calc(max(12rem, 30%));
     height: fit-content;
     color: inherit;
 }
@@ -158,7 +162,7 @@ nav {
 }
 
 .gallery>*.wide {
-    flex: 1 1 calc(max(10rem, 60%));
+    flex: 1 1 calc(max(12rem, 60%));
 }
 
 .gallery img {
