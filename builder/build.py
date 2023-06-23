@@ -1,16 +1,16 @@
 #!/bin/env python3
+from __future__ import annotations
+
+import dataclasses
+import functools
 import itertools
 import logging
 import re
 from pathlib import Path
-from typing import TypeAlias
 from xml.etree import ElementTree as ET
 
 import jinja2
 import markdown
-
-# Markdown-generated root element directly contains all <p>, <h1>, <h2>, etc.
-MarkdownBody: TypeAlias = ET.Element
 
 markdown_parser = markdown.Markdown(extensions=['meta', 'extra'])
 jinja_environment = jinja2.Environment(
@@ -30,16 +30,51 @@ def extract_title(body: ET.Element, include_markup: bool = False) -> str | None:
     return h.text
 
 
+def sluggify(title: str) -> str:
+    """ 'A (Normal) Title.' -> 'a-normal-title' """
+    return re.sub(r'\W+', '-', title).strip('-').lower()
+
+
+@dataclasses.dataclass
+class Document:
+    slug: str
+    root: ET.Element
+    """ Markdown-generated root element directly contains all <p>, <h1>, <h2>, etc. """
+    metadata: dict[str] = dataclasses.field(default_factory=dict)
+
+    @classmethod
+    def load_file(cls, path: Path):
+        if path.suffix not in ('.md', '.html', '.htm'):
+            raise ValueError(f'Document.load_file() expects a markdown file, got {path}')
+        return cls.from_string(path.read_text(), slug=sluggify(path.stem))
+
+    @classmethod
+    def from_string(cls, text: str, slug: str | None = None, *,
+                    markdown_parser: markdown.Markdown = markdown_parser,
+                    xml_parser: ET.XMLParser = None) -> Document:
+        inner_html = markdown_parser.reset().convert(text)
+        metadata = getattr(markdown_parser, 'Meta', None) or {}
+        root = ET.fromstring(''.join(('<html>', inner_html, '</html>')), parser=xml_parser)
+
+        instance = cls(slug, root, metadata=metadata)
+        if instance.slug is None:
+            instance.slug = sluggify(instance.title)
+        return instance
+
+    @functools.cached_property
+    def title(self) -> str:
+        return extract_title(self.root)
+
+    def inner_html(self):
+        return ET.tostring(self.root, encoding='unicode').replace('<html>', '').replace('</html>', '')
+
+
 def build_page(markdown_file: Path, output_dir: Path = Path('generated/projects')) -> Path:
     page_template = jinja_environment.get_template('project_page.html')
-    page_file = output_dir / (slug(markdown_file.stem) + '.html')
+    page_file = output_dir / (sluggify(markdown_file.stem) + '.html')
 
-    markdown_text = markdown_file.read_text()
-    html_text = markdown_parser.reset().convert(markdown_text)
-    html: MarkdownBody = ET.fromstring('<html>' + html_text + '</html>')
-    title = extract_title(html)
-
-    page = page_template.render(title=title, body=html_text)
+    document = Document.load_file(markdown_file)
+    page = page_template.render(title=document.title, body=document.inner_html())
 
     logging.info('%s -> %s', markdown_file, page_file)
     page_file.parent.mkdir(exist_ok=True, parents=True)
