@@ -39,7 +39,10 @@ def main():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('targets', type=Path, nargs='*')
+    parser.add_argument('-v', '--verbose', action='count', dest='verbosity', default=0)
+    parser.add_argument('-q', '--quiet', action='count', dest='quietness', default=0)
     args = parser.parse_args()
+    logging.getLogger().setLevel(30 - 10 * (args.verbosity-args.quietness))
     targets: list[Path] = args.targets
     markdown_files = itertools.chain.from_iterable(file.rglob('*.md') if file.is_dir() else (file,) for file in targets)
     for markdown_file in markdown_files:
