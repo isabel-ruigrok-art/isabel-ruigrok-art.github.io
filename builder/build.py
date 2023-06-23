@@ -7,6 +7,7 @@ import itertools
 import logging
 import re
 from pathlib import Path
+from typing import Iterable
 from xml.etree import ElementTree as ET
 
 import jinja2
@@ -108,18 +109,41 @@ def build_page(markdown_file: Path, output_dir: Path = Path('generated/projects'
     return page_file
 
 
+def gallery_item(document: Document) -> dict:
+    # TODO: automatically determine this from image dimensions
+    is_wide = 'wide' in document.headline_image.get('class').split()
+    return dict(
+        link=f'/projects/{document.slug}.html',
+        title=document.title,
+        image_src=document.headline_image.get('src'),
+        wide=is_wide
+    )
+
+
+def build_projects_index(documents: Iterable[Document], output_path: Path = Path('generated/projects/index.html')) -> Path:
+    template = jinja_environment.get_template('projects.html')
+    page = template.render(items=(gallery_item(doc) for doc in documents))
+    logging.info('-> %s', output_path)
+    output_path.write_text(page)
+    return output_path
+
+
 def main():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('targets', type=Path, nargs='*')
+    parser.add_argument('--gallery', action=argparse.BooleanOptionalAction, dest='should_update_gallery', default=True)
     parser.add_argument('-v', '--verbose', action='count', dest='verbosity', default=0)
     parser.add_argument('-q', '--quiet', action='count', dest='quietness', default=0)
     args = parser.parse_args()
-    logging.getLogger().setLevel(30 - 10 * (args.verbosity-args.quietness))
+    logging.getLogger().setLevel(30 - 10 * (args.verbosity - args.quietness))
     targets: list[Path] = args.targets
-    markdown_files = itertools.chain.from_iterable(file.rglob('*.md') if file.is_dir() else (file,) for file in targets)
+    markdown_files = list(
+        itertools.chain.from_iterable(file.rglob('*.md') if file.is_dir() else (file,) for file in targets))
     for markdown_file in markdown_files:
         build_page(markdown_file)
+    if args.should_update_gallery:
+        build_projects_index(Document.load_file(file) for file in markdown_files)
 
 
 if __name__ == '__main__':

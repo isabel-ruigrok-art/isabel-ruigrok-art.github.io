@@ -1,0 +1,23 @@
+{% macro gallery_item(link, title, image_src, properties=None, wide=False) -%}
+    <a href="{{ link }}" class="{{ 'wide' if wide else 'tall' }}">
+        <figure>
+            <img src="{{ image_src }}" alt="{{ title }}">
+            <figcaption>
+                <h3>{{ title }}</h3>
+                {% if properties %}
+                    <ul>
+                        {% for property in properties -%}
+                            <li>{{ property }}</li>
+                        {%- endfor %}
+                    </ul>
+                {% endif %}
+            </figcaption>
+        </figure>
+    </a>
+{%- endmacro %}
+
+<div class="gallery">
+    {% for item in items %}
+        {{ gallery_item(**item) }}
+    {% endfor %}
+</div>
