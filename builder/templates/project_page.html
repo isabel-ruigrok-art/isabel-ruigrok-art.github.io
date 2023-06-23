@@ -1,5 +1,8 @@
 {% extends "page.html" %}
 {% block title %} Isabel Ruigrok - {{ title }} {% endblock title %}
-{% block main %}
-    {{ body }}
-{% endblock main %}
+{% block main -%}
+{{ headline }}
+<section>
+{{ description }}
+</section>
+{%- endblock main %}

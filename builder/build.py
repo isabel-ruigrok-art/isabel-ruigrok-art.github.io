@@ -30,6 +30,29 @@ def extract_title(body: ET.Element, include_markup: bool = False) -> str | None:
     return h.text
 
 
+def identify_headline_image(body: ET.Element) -> tuple[ET.Element, ET.Element] | None:
+    """ find the first image preceding any text elements and return the containing element and image element, or None if no such image exists. """
+    for el in body:
+        if el.text:
+            return None
+        if (img := el.find('img')) is not None:
+            return el, img
+    return None
+
+
+def pop_headline_image(body: ET.Element) -> ET.Element:
+    """ remove and return headline image from body """
+    match identify_headline_image(body):
+        case None:
+            raise NotImplementedError('')
+        case (p, img):
+            body.remove(p)
+            img: ET.Element
+            if 'headline' not in img.get('class', '').split():
+                img.set('class', img.get('class', '') + ' headline')
+            return img
+
+
 def sluggify(title: str) -> str:
     """ 'A (Normal) Title.' -> 'a-normal-title' """
     return re.sub(r'\W+', '-', title).strip('-').lower()
@@ -40,6 +63,8 @@ class Document:
     slug: str
     root: ET.Element
     """ Markdown-generated root element directly contains all <p>, <h1>, <h2>, etc. """
+    headline_image: ET.Element = None
+    """ image used in preview and at the top of page """
     metadata: dict[str] = dataclasses.field(default_factory=dict)
 
     @classmethod
@@ -55,8 +80,9 @@ class Document:
         inner_html = markdown_parser.reset().convert(text)
         metadata = getattr(markdown_parser, 'Meta', None) or {}
         root = ET.fromstring(''.join(('<html>', inner_html, '</html>')), parser=xml_parser)
+        img = pop_headline_image(root)
 
-        instance = cls(slug, root, metadata=metadata)
+        instance = cls(slug, root, metadata=metadata, headline_image=img)
         if instance.slug is None:
             instance.slug = sluggify(instance.title)
         return instance
@@ -74,7 +100,7 @@ def build_page(markdown_file: Path, output_dir: Path = Path('generated/projects'
     page_file = output_dir / (sluggify(markdown_file.stem) + '.html')
 
     document = Document.load_file(markdown_file)
-    page = page_template.render(title=document.title, body=document.inner_html())
+    page = page_template.render(title=document.title, description=document.inner_html(), headline=ET.tostring(document.headline_image, encoding='unicode'))
 
     logging.info('%s -> %s', markdown_file, page_file)
     page_file.parent.mkdir(exist_ok=True, parents=True)
