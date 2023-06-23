@@ -1,4 +1,5 @@
 #!/bin/env python3
+import itertools
 import logging
 import re
 from pathlib import Path
@@ -40,8 +41,9 @@ def main():
     parser.add_argument('targets', type=Path, nargs='*')
     args = parser.parse_args()
     targets: list[Path] = args.targets
-    for target in targets:
-        build_page(target)
+    markdown_files = itertools.chain.from_iterable(file.rglob('*.md') if file.is_dir() else (file,) for file in targets)
+    for markdown_file in markdown_files:
+        build_page(markdown_file)
 
 
 if __name__ == '__main__':
