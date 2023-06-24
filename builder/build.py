@@ -98,14 +98,13 @@ class Document:
         return ET.tostring(self.root, encoding='unicode').replace('<html>', '').replace('</html>', '')
 
 
-def build_page(markdown_file: Path) -> Path:
+def build_page(document: Document) -> Path:
     page_template = jinja_environment.get_template('project_page.html')
-    page_file = CONFIG.output_dir / CONFIG.projects_dir.relative_to(CONFIG.input_dir) / (sluggify(markdown_file.stem) + '.html')
+    page_file = CONFIG.output_dir / CONFIG.projects_dir.relative_to(CONFIG.input_dir) / (document.slug + '.html')
 
-    document = Document.load_file(markdown_file)
     page = page_template.render(title=document.title, description=document.inner_html(), headline=ET.tostring(document.headline_image, encoding='unicode'))
 
-    logging.info('%s -> %s', markdown_file, page_file)
+    logging.info('%s -> %s', document.slug, page_file)
     page_file.parent.mkdir(exist_ok=True, parents=True)
     page_file.write_text(page)
     return page_file
@@ -166,13 +165,13 @@ def main():
             CONFIG = config.Config.parse(config_path)
     jinja_environment.loader = jinja2.FileSystemLoader(CONFIG.templates_dir)
 
-    markdown_files = list(
-        itertools.chain.from_iterable(file.rglob('*.md') if file.is_dir() else (file,) for file in targets))
-    for markdown_file in markdown_files:
-        build_page(markdown_file)
+    markdown_files = itertools.chain.from_iterable(file.rglob('*.md') if file.is_dir() else (file,) for file in targets)
+    documents = [Document.load_file(file) for file in markdown_files]
+    for document in documents:
+        build_page(document)
     if args.should_update_gallery:
-        build_projects_index(Document.load_file(file) for file in markdown_files)
-        build_homepage(Document.load_file(file) for file in markdown_files)
+        build_projects_index(documents)
+        build_homepage(documents)
 
 
 if __name__ == '__main__':
