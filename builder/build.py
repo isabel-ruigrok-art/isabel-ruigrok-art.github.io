@@ -13,10 +13,12 @@ from xml.etree import ElementTree as ET
 import jinja2
 import markdown
 
+import config
+
+CONFIG = config.Config()
+
 markdown_parser = markdown.Markdown(extensions=['meta', 'extra'])
-jinja_environment = jinja2.Environment(
-    loader=jinja2.FileSystemLoader(Path(__file__).parent / 'templates')
-)
+jinja_environment = jinja2.Environment()
 
 
 def extract_title(body: ET.Element, include_markup: bool = False) -> str | None:
@@ -96,9 +98,9 @@ class Document:
         return ET.tostring(self.root, encoding='unicode').replace('<html>', '').replace('</html>', '')
 
 
-def build_page(markdown_file: Path, output_dir: Path = Path('generated/projects')) -> Path:
+def build_page(markdown_file: Path) -> Path:
     page_template = jinja_environment.get_template('project_page.html')
-    page_file = output_dir / (sluggify(markdown_file.stem) + '.html')
+    page_file = CONFIG.output_dir / CONFIG.projects_dir.relative_to(CONFIG.input_dir) / (sluggify(markdown_file.stem) + '.html')
 
     document = Document.load_file(markdown_file)
     page = page_template.render(title=document.title, description=document.inner_html(), headline=ET.tostring(document.headline_image, encoding='unicode'))
@@ -113,14 +115,15 @@ def gallery_item(document: Document) -> dict:
     # TODO: automatically determine this from image dimensions
     is_wide = 'wide' in document.headline_image.get('class').split()
     return dict(
-        link=f'/projects/{document.slug}.html',
+        link=str('/' / CONFIG.projects_dir.relative_to(CONFIG.input_dir) / (document.slug + '.html')),
         title=document.title,
         image_src=document.headline_image.get('src'),
         wide=is_wide
     )
 
 
-def build_projects_index(documents: Iterable[Document], output_path: Path = Path('generated/projects/index.html')) -> Path:
+def build_projects_index(documents: Iterable[Document], output_path: Path = Path('projects/index.html')) -> Path:
+    output_path = output_path if output_path.is_absolute() else CONFIG.output_dir / output_path
     template = jinja_environment.get_template('projects.html')
     page = template.render(items=(gallery_item(doc) for doc in documents))
     logging.info('-> %s', output_path)
@@ -128,7 +131,8 @@ def build_projects_index(documents: Iterable[Document], output_path: Path = Path
     return output_path
 
 
-def build_homepage(documents: Iterable[Document], output_path: Path = Path('generated/index.html')) -> Path:
+def build_homepage(documents: Iterable[Document], output_path: Path = Path('index.html')) -> Path:
+    output_path = output_path if output_path.is_absolute() else CONFIG.output_dir / output_path
     template = jinja_environment.get_template('index.html')
     newest_docs = itertools.islice(documents, 6)  # TODO: use date metadata
     page = template.render(items=(gallery_item(doc) for doc in newest_docs))
@@ -138,15 +142,30 @@ def build_homepage(documents: Iterable[Document], output_path: Path = Path('gene
 
 
 def main():
+    global CONFIG
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('targets', type=Path, nargs='*')
     parser.add_argument('--gallery', action=argparse.BooleanOptionalAction, dest='should_update_gallery', default=True)
     parser.add_argument('-v', '--verbose', action='count', dest='verbosity', default=0)
     parser.add_argument('-q', '--quiet', action='count', dest='quietness', default=0)
+    parser.add_argument('-c', '--config', type=Path, default=None)
     args = parser.parse_args()
-    logging.getLogger().setLevel(30 - 10 * (args.verbosity - args.quietness))
+    config_path: Path = args.config
+    log_level: int = 30 - 10 * (args.verbosity - args.quietness)
     targets: list[Path] = args.targets
+
+    logging.getLogger().setLevel(log_level)
+
+    if config_path and not config_path.exists():
+        logging.warning(f'config file not found: {config_path}')
+    else:
+        if not config_path and (Path.cwd() / 'config.ini').exists():
+            config_path = Path.cwd() / 'config.ini'
+        if config_path:
+            CONFIG = config.Config.parse(config_path)
+    jinja_environment.loader = jinja2.FileSystemLoader(CONFIG.templates_dir)
+
     markdown_files = list(
         itertools.chain.from_iterable(file.rglob('*.md') if file.is_dir() else (file,) for file in targets))
     for markdown_file in markdown_files:
