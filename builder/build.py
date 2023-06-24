@@ -11,10 +11,10 @@ from xml.etree import ElementTree as ET
 
 import jinja2
 
-import config
+from config import Config
 from builder.document import Document
 
-CONFIG = config.Config()
+CONFIG = Config()
 
 jinja_environment = jinja2.Environment()
 
@@ -119,7 +119,7 @@ def main():
         if not config_path and (Path.cwd() / 'config.ini').exists():
             config_path = Path.cwd() / 'config.ini'
         if config_path:
-            CONFIG = config.Config.parse(config_path)
+            CONFIG = Config.parse(config_path)
     jinja_environment.loader = jinja2.FileSystemLoader(CONFIG.templates_dir)
 
     if targets:
