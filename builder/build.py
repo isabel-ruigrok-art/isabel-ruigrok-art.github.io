@@ -11,12 +11,12 @@ from xml.etree import ElementTree as ET
 
 import jinja2
 
-from config import Config
 from builder.document import Document
+from config import CONFIG
 
-CONFIG = Config()
-
-jinja_environment = jinja2.Environment()
+jinja_environment = jinja2.Environment(
+    loader=jinja2.FileSystemLoader(CONFIG.templates_dir)
+)
 
 
 def build_page(document: Document) -> Path:
@@ -94,7 +94,6 @@ def sync_static_path(src: Path) -> Path:
 
 
 def main():
-    global CONFIG
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('targets', type=Path, nargs='*',
@@ -105,22 +104,11 @@ def main():
     parser.add_argument('--sync-static', action=argparse.BooleanOptionalAction, dest='should_sync_static', default=False, help='copy/link static files to output')
     parser.add_argument('-v', '--verbose', action='count', dest='verbosity', default=0)
     parser.add_argument('-q', '--quiet', action='count', dest='quietness', default=0)
-    parser.add_argument('-c', '--config', type=Path, default=None)
     args = parser.parse_args()
-    config_path: Path = args.config
     log_level: int = 30 - 10 * (args.verbosity - args.quietness)
     targets: list[Path] = args.targets
 
     logging.getLogger().setLevel(log_level)
-
-    if config_path and not config_path.exists():
-        logging.warning(f'config file not found: {config_path}')
-    else:
-        if not config_path and (Path.cwd() / 'config.ini').exists():
-            config_path = Path.cwd() / 'config.ini'
-        if config_path:
-            CONFIG = Config.parse(config_path)
-    jinja_environment.loader = jinja2.FileSystemLoader(CONFIG.templates_dir)
 
     if targets:
         markdown_files = itertools.chain.from_iterable(file.rglob('*.md') if file.is_dir() else (file,) for file in targets)

@@ -53,3 +53,27 @@ class Config:
             projects_dir=parser['paths'].getpath('projects', cls.projects_dir),
             static_paths=parser['paths'].getpathlist('static', cls.static_paths)
         )
+
+
+def _get_config() -> Config:
+    import argparse
+    import sys
+    import warnings
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--config', type=Path)
+    args, unparsed = parser.parse_known_args()
+    sys.argv = [sys.argv[0], *unparsed]  # ⚠️
+    config_path: Path | None = args.config
+    default_config_path: Path = Path.cwd() / 'config.ini'
+
+    if config_path and not config_path.exists():
+        raise FileNotFoundError(f'config file not found: {config_path}')
+    if config_path:
+        return Config.parse(config_path)
+    if default_config_path.exists():
+        return Config.parse(default_config_path)
+    warnings.warn('no config file; using default config.')
+    return Config()
+
+
+CONFIG = _get_config()
