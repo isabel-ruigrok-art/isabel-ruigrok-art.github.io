@@ -15,7 +15,7 @@ class Config:
     output_dir: Path = Path('generated')
     input_dir: Path = Path('source')
     templates_dir: Path = input_dir / 'templates'
-    static_dirs: Collection[Path] = (input_dir / 'style', input_dir / 'script', input_dir / 'images')
+    static_paths: Collection[Path] = (input_dir / 'style', input_dir / 'script', input_dir / 'images')
     projects_dir: Path = input_dir / 'projects'
 
     def __post_init__(self):
@@ -25,6 +25,7 @@ class Config:
             dir_path: Path = getattr(self, field)
             if not dir_path.is_absolute():
                 setattr(self, field, self.root_dir / dir_path)
+        self.static_paths = [path if path.is_absolute() else self.root_dir / path for path in self.static_paths]
 
     @classmethod
     def parse(cls, config_path: Path) -> Config:
@@ -50,5 +51,5 @@ class Config:
             templates_dir=parser['paths'].getpath('templates', cls.templates_dir),
             input_dir=parser['paths'].getpath('input', cls.input_dir),
             projects_dir=parser['paths'].getpath('projects', cls.projects_dir),
-            static_dirs=parser['paths'].getpathlist('static', cls.static_dirs)
+            static_paths=parser['paths'].getpathlist('static', cls.static_paths)
         )
