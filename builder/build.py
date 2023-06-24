@@ -128,6 +128,15 @@ def build_projects_index(documents: Iterable[Document], output_path: Path = Path
     return output_path
 
 
+def build_homepage(documents: Iterable[Document], output_path: Path = Path('generated/index.html')) -> Path:
+    template = jinja_environment.get_template('index.html')
+    newest_docs = itertools.islice(documents, 6)  # TODO: use date metadata
+    page = template.render(items=(gallery_item(doc) for doc in newest_docs))
+    logging.info('-> %s', output_path)
+    output_path.write_text(page)
+    return output_path
+
+
 def main():
     import argparse
     parser = argparse.ArgumentParser()
@@ -144,6 +153,7 @@ def main():
         build_page(markdown_file)
     if args.should_update_gallery:
         build_projects_index(Document.load_file(file) for file in markdown_files)
+        build_homepage(Document.load_file(file) for file in markdown_files)
 
 
 if __name__ == '__main__':
