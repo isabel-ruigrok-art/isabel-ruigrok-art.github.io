@@ -144,7 +144,9 @@ def main():
     global CONFIG
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('targets', type=Path, nargs='*')
+    parser.add_argument('targets', type=Path, nargs='*',
+                        help='project .md files to build / include in gallery.\n'
+                             'if not given, includes all .md files in the projects directory.')
     parser.add_argument('--project-pages', action=argparse.BooleanOptionalAction, dest='should_build_project_pages', default=True, help='build project pages')
     parser.add_argument('--gallery', action=argparse.BooleanOptionalAction, dest='should_update_gallery', default=True, help='update project index and homepage')
     parser.add_argument('-v', '--verbose', action='count', dest='verbosity', default=0)
@@ -166,7 +168,10 @@ def main():
             CONFIG = config.Config.parse(config_path)
     jinja_environment.loader = jinja2.FileSystemLoader(CONFIG.templates_dir)
 
-    markdown_files = itertools.chain.from_iterable(file.rglob('*.md') if file.is_dir() else (file,) for file in targets)
+    if targets:
+        markdown_files = itertools.chain.from_iterable(file.rglob('*.md') if file.is_dir() else (file,) for file in targets)
+    else:
+        markdown_files = CONFIG.projects_dir.glob('*.md')
     documents = [Document.load_file(file) for file in markdown_files]
     if args.should_build_project_pages:
         for document in documents:
