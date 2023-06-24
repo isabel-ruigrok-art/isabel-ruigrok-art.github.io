@@ -5,7 +5,9 @@ import dataclasses
 import functools
 import itertools
 import logging
+import os
 import re
+import shutil
 from pathlib import Path
 from typing import Iterable
 from xml.etree import ElementTree as ET
@@ -140,6 +142,38 @@ def build_homepage(documents: Iterable[Document], output_path: Path = Path('inde
     return output_path
 
 
+def sync_static_path(src: Path) -> Path:
+    dst = CONFIG.output_dir / src.relative_to(CONFIG.input_dir)
+    if src.is_file():
+        if not dst.exists():
+            try:
+                os.link(src, dst)
+                logging.info('%s => %s', src, dst)
+            except OSError:
+                shutil.copy2(src, dst)
+                logging.info('%s -> %s', src, dst)
+        elif dst.samefile(src):
+            pass
+        else:
+            shutil.copy2(src, dst)
+            logging.info('%s -> %s', src, dst)
+    elif src.is_dir():
+        if not dst.exists():
+            try:
+                os.symlink(src, dst, target_is_directory=True)
+                logging.info('%s => %s', src, dst)
+            except OSError:
+                shutil.copytree(src, dst)
+                logging.info('%s -> %s', src, dst)
+        elif dst.is_symlink():
+            pass
+        else:
+            # TODO: only sync changes.
+            shutil.rmtree(dst, ignore_errors=True)
+            shutil.copytree(src, dst)
+            logging.info('%s -> %s', src, dst)
+
+
 def main():
     global CONFIG
     import argparse
@@ -149,6 +183,7 @@ def main():
                              'if not given, includes all .md files in the projects directory.')
     parser.add_argument('--project-pages', action=argparse.BooleanOptionalAction, dest='should_build_project_pages', default=True, help='build project pages')
     parser.add_argument('--gallery', action=argparse.BooleanOptionalAction, dest='should_update_gallery', default=True, help='update project index and homepage')
+    parser.add_argument('--sync-static', action=argparse.BooleanOptionalAction, dest='should_sync_static', default=False, help='copy/link static files to output')
     parser.add_argument('-v', '--verbose', action='count', dest='verbosity', default=0)
     parser.add_argument('-q', '--quiet', action='count', dest='quietness', default=0)
     parser.add_argument('-c', '--config', type=Path, default=None)
@@ -179,6 +214,9 @@ def main():
     if args.should_update_gallery:
         build_projects_index(documents)
         build_homepage(documents)
+    if args.should_sync_static:
+        for static_path in CONFIG.static_paths:
+            sync_static_path(static_path)
 
 
 if __name__ == '__main__':

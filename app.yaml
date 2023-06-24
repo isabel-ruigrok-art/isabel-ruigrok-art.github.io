@@ -2,8 +2,8 @@ runtime: python311
 
 handlers:
 - url: /
-  static_files: site/index.html
-  upload: site/index.html
+  static_files: generated/index.html
+  upload: generated/index.html
 
 - url: /
-  static_dir: site/
+  static_dir: generated/

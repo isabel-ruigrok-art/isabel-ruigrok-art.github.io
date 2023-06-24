@@ -131,7 +131,8 @@ nav {
 /* #profile-picture */
 #profile-picture {
     clip-path: circle(50%);
-    scale: 1;
+    width: 200px;
+    height: auto;
 }
 
 /* .gallery */
