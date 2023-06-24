@@ -145,7 +145,8 @@ def main():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('targets', type=Path, nargs='*')
-    parser.add_argument('--gallery', action=argparse.BooleanOptionalAction, dest='should_update_gallery', default=True)
+    parser.add_argument('--project-pages', action=argparse.BooleanOptionalAction, dest='should_build_project_pages', default=True, help='build project pages')
+    parser.add_argument('--gallery', action=argparse.BooleanOptionalAction, dest='should_update_gallery', default=True, help='update project index and homepage')
     parser.add_argument('-v', '--verbose', action='count', dest='verbosity', default=0)
     parser.add_argument('-q', '--quiet', action='count', dest='quietness', default=0)
     parser.add_argument('-c', '--config', type=Path, default=None)
@@ -167,8 +168,9 @@ def main():
 
     markdown_files = itertools.chain.from_iterable(file.rglob('*.md') if file.is_dir() else (file,) for file in targets)
     documents = [Document.load_file(file) for file in markdown_files]
-    for document in documents:
-        build_page(document)
+    if args.should_build_project_pages:
+        for document in documents:
+            build_page(document)
     if args.should_update_gallery:
         build_projects_index(documents)
         build_homepage(documents)
