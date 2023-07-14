@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import dataclasses
 import functools
-
 import re
 from pathlib import Path
+from typing import Callable
 from xml.etree import ElementTree as ET
 
 import markdown
@@ -88,6 +88,12 @@ class Document:
     def inner_html(self):
         return ET.tostring(self.root, encoding='unicode').replace('<html>', '').replace('</html>', '')
 
+    def rewrite_urls(self, fn: Callable[[str],str]) -> None:
+        for el in self.root.iter('img'):
+            el.set('src', fn(el.get('src')))
+        for el in self.root.iter('a'):
+            el.set('href', fn(el.get('href')))
+        self.headline_image.set('src', fn(self.headline_image.get('src')))
 
 @dataclasses.dataclass
 class Piece:

@@ -148,6 +148,12 @@ def main():
             build_piece(piece)
     if args.should_update_gallery:
         build_projects_index(projects)
+        piece_descriptions = [piece.description for piece in pieces]
+        pieces_index_path = Path('pieces/index.html')
+        for piece, description in zip(pieces, piece_descriptions):
+            # todo: make this less hacky
+            description.rewrite_urls(lambda url: url if '/' in url else str(Path('/') / 'pieces' / piece.slug / url))
+        build_projects_index(piece_descriptions, output_path=pieces_index_path)
         build_homepage(projects)
     if args.should_sync_static:
         for static_path in CONFIG.static_paths:
