@@ -17,11 +17,12 @@ class Config:
     templates_dir: Path = input_dir / 'templates'
     static_paths: Collection[Path] = (input_dir / 'style', input_dir / 'script', input_dir / 'images')
     projects_dir: Path = input_dir / 'projects'
+    pieces_dir: Path = input_dir / 'pieces'
 
     def __post_init__(self):
         if not self.root_dir:
             return
-        for field in 'build_dir', 'output_dir', 'input_dir', 'templates_dir', 'projects_dir':
+        for field in 'build_dir', 'output_dir', 'input_dir', 'templates_dir', 'projects_dir', 'pieces_dir':
             dir_path: Path = getattr(self, field)
             if not dir_path.is_absolute():
                 setattr(self, field, self.root_dir / dir_path)
@@ -51,6 +52,7 @@ class Config:
             templates_dir=parser['paths'].getpath('templates', cls.templates_dir),
             input_dir=parser['paths'].getpath('input', cls.input_dir),
             projects_dir=parser['paths'].getpath('projects', cls.projects_dir),
+            pieces_dir=parser['paths'].getpath('pieces', cls.pieces_dir),
             static_paths=parser['paths'].getpathlist('static', cls.static_paths)
         )
 

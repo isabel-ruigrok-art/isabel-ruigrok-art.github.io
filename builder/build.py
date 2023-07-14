@@ -11,7 +11,7 @@ from xml.etree import ElementTree as ET
 
 import jinja2
 
-from builder.document import Document
+from document import Document, Piece
 from config import CONFIG
 
 jinja_environment = jinja2.Environment(
@@ -28,6 +28,24 @@ def build_page(document: Document) -> Path:
     logging.info('%s -> %s', document.slug, page_file)
     page_file.parent.mkdir(exist_ok=True, parents=True)
     page_file.write_text(page)
+    return page_file
+
+
+def build_piece(piece: Piece) -> Path:
+    page_template = jinja_environment.get_template('project_page.html')
+    page_dir = CONFIG.output_dir / CONFIG.pieces_dir.relative_to(CONFIG.input_dir) / piece.slug
+    page_file = page_dir / 'index.html'
+    description = piece.description
+
+    page = page_template.render(title=description.title, description=description.inner_html(), headline=ET.tostring(description.headline_image, encoding='unicode'))
+
+    logging.info('%s -> %s', piece.slug, page_file)
+    page_dir.mkdir(exist_ok=True, parents=True)
+    page_file.write_text(page)
+    for asset in piece.assets:
+        # TODO: avoid unnecessary copying
+        logging.info('%s -> %s', asset, page_dir / asset.name)
+        shutil.copy(asset, page_dir / asset.name)
     return page_file
 
 
@@ -100,6 +118,7 @@ def main():
                         help='project .md files to build / include in gallery.\n'
                              'if not given, includes all .md files in the projects directory.')
     parser.add_argument('--project-pages', action=argparse.BooleanOptionalAction, dest='should_build_project_pages', default=True, help='build project pages')
+    parser.add_argument('--piece-pages', action=argparse.BooleanOptionalAction, dest='should_build_piece_pages', default=True, help='build piece pages')
     parser.add_argument('--gallery', action=argparse.BooleanOptionalAction, dest='should_update_gallery', default=True, help='update project index and homepage')
     parser.add_argument('--sync-static', action=argparse.BooleanOptionalAction, dest='should_sync_static', default=False, help='copy/link static files to output')
     parser.add_argument('-v', '--verbose', action='count', dest='verbosity', default=0)
@@ -112,15 +131,24 @@ def main():
 
     if targets:
         markdown_files = itertools.chain.from_iterable(file.rglob('*.md') if file.is_dir() else (file,) for file in targets)
+        projects = [Document.load_file(file) for file in markdown_files if file.is_relative_to(CONFIG.projects_dir)]
+        pieces = [Piece(file) for file in markdown_files if file.is_relative_to(CONFIG.pieces_dir)]
+        other = [file for file in markdown_files if not file.is_relative_to(CONFIG.pieces_dir) and not file.is_relative_to(CONFIG.projects_dir)]
+        if other:
+            logging.warning('ignoring files outside of projects and pieces directories: %s', other)
     else:
-        markdown_files = CONFIG.projects_dir.glob('*.md')
-    documents = [Document.load_file(file) for file in markdown_files]
+        projects = [Document.load_file(file) for file in CONFIG.projects_dir.glob('*.md')]
+        pieces = [Piece(file) for file in CONFIG.pieces_dir.iterdir()]
+
     if args.should_build_project_pages:
-        for document in documents:
+        for document in projects:
             build_page(document)
+    if args.should_build_piece_pages:
+        for piece in pieces:
+            build_piece(piece)
     if args.should_update_gallery:
-        build_projects_index(documents)
-        build_homepage(documents)
+        build_projects_index(projects)
+        build_homepage(projects)
     if args.should_sync_static:
         for static_path in CONFIG.static_paths:
             sync_static_path(static_path)
