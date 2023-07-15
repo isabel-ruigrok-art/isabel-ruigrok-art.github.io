@@ -4,7 +4,7 @@ import dataclasses
 import functools
 import re
 from pathlib import Path
-from typing import Callable
+from typing import Callable, ClassVar
 from xml.etree import ElementTree as ET
 
 import markdown
@@ -53,6 +53,47 @@ def sluggify(title: str) -> str:
 
 
 @dataclasses.dataclass
+class Resource:
+    DIRECTORY: ClassVar[Path]
+    """ relative path to output directory (should be set by subclasses, e.g. pieces/ or projects/) """
+    path: Path
+    """ Piece directory """
+    slug: str = None
+    """ Piece slug, defaults to directory name """
+    description_path: Path = None
+    """ Path to description file, defaults to index.md """
+
+    def __post_init__(self):
+        if not self.slug:
+            self.slug = sluggify(self.path.stem)
+
+    @classmethod
+    def from_path(cls, path: Path):
+        if path.suffix in ('.md', '.html'):
+            return cls(path.parent, description_path=path)
+        else:
+            return cls(path)
+
+    @functools.cached_property
+    def assets(self) -> list[Path]:
+        return [p for p in self.path.iterdir() if p.suffix not in ('.md', '.html', '')]
+
+    @functools.cached_property
+    def description(self) -> Document:
+        if self.description_path:
+            pass
+        elif (p := self.path / 'index.md').exists():
+            self.description_path = p
+        elif (p := self.path / f'{self.slug}.md').exists():
+            self.description_path = p
+        elif p := next(self.path.glob('.md'), None):
+            self.description_path = p
+        else:
+            raise FileNotFoundError(f'No description file found for {self}')
+        return Document.load_file(self.description_path)
+
+
+@dataclasses.dataclass
 class Document:
     slug: str
     root: ET.Element
@@ -88,47 +129,19 @@ class Document:
     def inner_html(self):
         return ET.tostring(self.root, encoding='unicode').replace('<html>', '').replace('</html>', '')
 
-    def rewrite_urls(self, fn: Callable[[str],str]) -> None:
+    def rewrite_urls(self, fn: Callable[[str], str]) -> None:
         for el in self.root.iter('img'):
             el.set('src', fn(el.get('src')))
         for el in self.root.iter('a'):
             el.set('href', fn(el.get('href')))
         self.headline_image.set('src', fn(self.headline_image.get('src')))
 
+
 @dataclasses.dataclass
-class Piece:
-    path: Path
-    """ Piece directory """
-    slug: str = None
-    """ Piece slug, defaults to directory name """
-    description_path: Path = None
-    """ Path to description file, defaults to index.md """
+class Piece(Resource):
+    DIRECTORY: ClassVar[Path] = Path('pieces')
 
-    def __post_init__(self):
-        if not self.slug:
-            self.slug = sluggify(self.path.stem)
 
-    @classmethod
-    def from_path(cls, path: Path):
-        if path.suffix in ('.md', '.html'):
-            return cls(path.parent, description_path=path)
-        else:
-            return cls(path)
-
-    @functools.cached_property
-    def assets(self) -> list[Path]:
-        return [p for p in self.path.iterdir() if p.suffix not in ('.md', '.html')]
-
-    @functools.cached_property
-    def description(self) -> Document:
-        if self.description_path:
-            pass
-        elif (p := self.path / 'index.md').exists():
-            self.description_path = p
-        elif (p := self.path / f'{self.slug}.md').exists():
-            self.description_path = p
-        elif p := next(self.path.glob('.md'), None):
-            self.description_path = p
-        else:
-            raise FileNotFoundError(f'No description file found for {self}')
-        return Document.load_file(self.description_path)
+@dataclasses.dataclass
+class Project(Resource):
+    DIRECTORY: ClassVar[Path] = Path('projects')

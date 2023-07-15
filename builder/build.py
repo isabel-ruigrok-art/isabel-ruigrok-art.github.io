@@ -11,7 +11,7 @@ from xml.etree import ElementTree as ET
 
 import jinja2
 
-from document import Document, Piece
+from document import Document, Piece, Project, Resource
 from config import CONFIG
 
 jinja_environment = jinja2.Environment(
@@ -19,61 +19,54 @@ jinja_environment = jinja2.Environment(
 )
 
 
-def build_page(document: Document) -> Path:
-    page_template = jinja_environment.get_template('project_page.html')
-    page_file = CONFIG.output_dir / CONFIG.projects_dir.relative_to(CONFIG.input_dir) / (document.slug + '.html')
-
-    page = page_template.render(title=document.title, description=document.inner_html(), headline=ET.tostring(document.headline_image, encoding='unicode'))
-
-    logging.info('%s -> %s', document.slug, page_file)
-    page_file.parent.mkdir(exist_ok=True, parents=True)
-    page_file.write_text(page)
-    return page_file
-
-
-def build_piece(piece: Piece) -> Path:
-    page_template = jinja_environment.get_template('project_page.html')
-    page_dir = CONFIG.output_dir / CONFIG.pieces_dir.relative_to(CONFIG.input_dir) / piece.slug
+def build_resource(resource: Resource) -> Path:
+    page_template = jinja_environment.get_template(f'resource_page.html')
+    page_dir = CONFIG.output_dir / resource.DIRECTORY / resource.slug
     page_file = page_dir / 'index.html'
-    description = piece.description
+    description = resource.description
+    page = page_template.render(
+        title=description.title,
+        description=description.inner_html(),
+        headline=ET.tostring(description.headline_image, encoding='unicode')
+    )
 
-    page = page_template.render(title=description.title, description=description.inner_html(), headline=ET.tostring(description.headline_image, encoding='unicode'))
-
-    logging.info('%s -> %s', piece.slug, page_file)
+    logging.info('%s -> %s', resource.slug, page_file)
     page_dir.mkdir(exist_ok=True, parents=True)
     page_file.write_text(page)
-    for asset in piece.assets:
+    for asset in resource.assets:
         # TODO: avoid unnecessary copying
         logging.info('%s -> %s', asset, page_dir / asset.name)
         shutil.copy(asset, page_dir / asset.name)
     return page_file
 
 
-def gallery_item(document: Document) -> dict:
+def gallery_item(resource: Resource) -> dict:
+    description = resource.description
     # TODO: automatically determine this from image dimensions
-    is_wide = 'wide' in document.headline_image.get('class').split()
+    is_wide = 'wide' in description.headline_image.get('class').split()
     return dict(
-        link=str('/' / CONFIG.projects_dir.relative_to(CONFIG.input_dir) / (document.slug + '.html')),
-        title=document.title,
-        image_src=document.headline_image.get('src'),
+        link=str(Path('/') / resource.DIRECTORY / resource.slug),
+        title=description.title,
+        image_src=description.headline_image.get('src'),
         wide=is_wide
     )
 
 
-def build_projects_index(documents: Iterable[Document], output_path: Path = Path('projects/index.html')) -> Path:
-    output_path = output_path if output_path.is_absolute() else CONFIG.output_dir / output_path
-    template = jinja_environment.get_template('projects.html')
-    page = template.render(items=(gallery_item(doc) for doc in documents))
+def build_resources_index(resources: Iterable[Resource], kind: type[Resource] | str) -> Path:
+    kind = Path(getattr(kind, 'DIRECTORY', kind))
+    output_path = CONFIG.output_dir / kind / 'index.html'
+    template = jinja_environment.get_template(f'resource_index.html')
+    page = template.render(items=(gallery_item(r) for r in resources if r.DIRECTORY == kind))
     logging.info('-> %s', output_path)
     output_path.write_text(page)
     return output_path
 
 
-def build_homepage(documents: Iterable[Document], output_path: Path = Path('index.html')) -> Path:
+def build_homepage(projects: Iterable[Project], output_path: Path = Path('index.html')) -> Path:
     output_path = output_path if output_path.is_absolute() else CONFIG.output_dir / output_path
     template = jinja_environment.get_template('index.html')
-    newest_docs = itertools.islice(documents, 6)  # TODO: use date metadata
-    page = template.render(items=(gallery_item(doc) for doc in newest_docs))
+    newest_projects = itertools.islice(projects, 6)  # TODO: use date metadata
+    page = template.render(items=(gallery_item(project) for project in newest_projects))
     logging.info('-> %s', output_path)
     output_path.write_text(page)
     return output_path
@@ -130,30 +123,38 @@ def main():
     logging.getLogger().setLevel(log_level)
 
     if targets:
-        markdown_files = itertools.chain.from_iterable(file.rglob('*.md') if file.is_dir() else (file,) for file in targets)
-        projects = [Document.load_file(file) for file in markdown_files if file.is_relative_to(CONFIG.projects_dir)]
-        pieces = [Piece(file) for file in markdown_files if file.is_relative_to(CONFIG.pieces_dir)]
-        other = [file for file in markdown_files if not file.is_relative_to(CONFIG.pieces_dir) and not file.is_relative_to(CONFIG.projects_dir)]
+        projects = [Project.from_path(file) for file in targets if CONFIG.projects_dir in file.parents]
+        pieces = [Piece.from_path(file) for file in targets if CONFIG.pieces_dir in file.parents]
+        other = [file for file in targets if CONFIG.projects_dir not in file.parents and CONFIG.pieces_dir not in file.parents]
         if other:
             logging.warning('ignoring files outside of projects and pieces directories: %s', other)
     else:
-        projects = [Document.load_file(file) for file in CONFIG.projects_dir.glob('*.md')]
-        pieces = [Piece(file) for file in CONFIG.pieces_dir.iterdir()]
+        projects = [Project.from_path(file) for file in CONFIG.projects_dir.iterdir()]
+        pieces = [Piece.from_path(file) for file in CONFIG.pieces_dir.iterdir()]
 
     if args.should_build_project_pages:
-        for document in projects:
-            build_page(document)
+        for project in projects:
+            build_resource(project)
     if args.should_build_piece_pages:
         for piece in pieces:
-            build_piece(piece)
+            build_resource(piece)
     if args.should_update_gallery:
-        build_projects_index(projects)
-        piece_descriptions = [piece.description for piece in pieces]
-        pieces_index_path = Path('pieces/index.html')
-        for piece, description in zip(pieces, piece_descriptions):
+        for resource in itertools.chain(projects, pieces):
             # todo: make this less hacky
-            description.rewrite_urls(lambda url: url if '/' in url else str(Path('/') / 'pieces' / piece.slug / url))
-        build_projects_index(piece_descriptions, output_path=pieces_index_path)
+            def fn(url):
+                if ':' in url:  # should really use urlparse, but this is good enough for now
+                    return url
+                if url.startswith('/'):
+                    return url
+                # FIXME: this assumes input and output directories have the same structure
+                absolute = (resource.description_path.parent / url).resolve()
+                try:
+                    return absolute.relative_to(CONFIG.input_dir / resource.DIRECTORY).as_posix()
+                except ValueError:
+                    return '/' + absolute.relative_to(CONFIG.input_dir).as_posix()
+            resource.description.rewrite_urls(fn)
+        build_resources_index(projects, kind=Project)
+        build_resources_index(pieces, kind=Piece)
         build_homepage(projects)
     if args.should_sync_static:
         for static_path in CONFIG.static_paths:
