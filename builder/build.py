@@ -43,7 +43,7 @@ def build_resource(resource: Resource) -> Path:
 def gallery_item(resource: Resource) -> dict:
     description = resource.description
     # TODO: automatically determine this from image dimensions
-    is_wide = 'wide' in description.headline_image.get('class').split()
+    is_wide = 'wide' in description.headline_image.get('class', '').split()
     return dict(
         link=str(Path('/') / resource.DIRECTORY / resource.slug),
         title=description.title,
