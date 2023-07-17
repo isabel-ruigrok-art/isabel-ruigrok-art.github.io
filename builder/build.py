@@ -147,7 +147,7 @@ def main():
                 if url.startswith('/'):
                     return url
                 # FIXME: this assumes input and output directories have the same structure
-                absolute = (resource.description_path.parent / url).resolve()
+                absolute = (resource.path / url).resolve()
                 try:
                     return absolute.relative_to(CONFIG.input_dir / resource.DIRECTORY).as_posix()
                 except ValueError:

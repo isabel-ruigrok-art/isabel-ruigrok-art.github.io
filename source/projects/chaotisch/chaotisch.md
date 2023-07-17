@@ -3,4 +3,4 @@
 
 ![chaotisch](../../images/chaotisch-2.jpeg){.fullwidth}
 
-![chaotisch](../../images/chaotisch.jpeg){.fullwidth}
+![chaotisch](../../pieces/chaotisch/chaotisch.jpeg){.fullwidth}

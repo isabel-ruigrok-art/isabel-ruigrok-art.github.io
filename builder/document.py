@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 import functools
+import logging
 import re
 from pathlib import Path
 from typing import Callable, ClassVar
@@ -10,6 +11,18 @@ from xml.etree import ElementTree as ET
 import markdown
 
 markdown_parser = markdown.Markdown(extensions=['meta', 'extra'])
+
+
+def make_headline_image(src: str, alt: str, wide: bool = False) -> ET.Element:
+    """ make an `img.headline` element with the given src and alt text, and optionally the 'wide' class. """
+    img = ET.Element('img')
+    img.set('src', str(src))
+    img.set('alt', alt)
+    if wide:
+        img.set('class', 'wide headline')
+    else:
+        img.set('class', 'headline')
+    return img
 
 
 def extract_title(body: ET.Element, include_markup: bool = False) -> str | None:
@@ -52,6 +65,12 @@ def sluggify(title: str) -> str:
     return re.sub(r'\W+', '-', title).strip('-').lower()
 
 
+def is_wide(path: Path) -> bool:
+    """ Return true if the image width is greater than the height. """
+    # todo: implement
+    return False
+
+
 @dataclasses.dataclass
 class Resource:
     DIRECTORY: ClassVar[Path]
@@ -89,8 +108,23 @@ class Resource:
         elif p := next(self.path.glob('.md'), None):
             self.description_path = p
         else:
-            raise FileNotFoundError(f'No description file found for {self}')
+            logging.debug('generating default description for %s/%s', self.DIRECTORY, self.slug)
+            return self._generate_description()
         return Document.load_file(self.description_path)
+
+    def _generate_description(self) -> Document:
+        """ generate a simple description document for when no index.md is present. """
+        if not self.assets:
+            headline_img = None
+        else:
+            path = next((p for p in self.assets if sluggify(p.stem) == self.slug), self.assets[0])
+            headline_img = make_headline_image(str(path.relative_to(self.path)), alt=str(path.stem), wide=is_wide(path))
+
+        return Document(
+            self.slug,
+            ET.fromstring(f'<html><h1>{self.slug}</h1></html>'),
+            headline_image=headline_img
+        )
 
 
 @dataclasses.dataclass
