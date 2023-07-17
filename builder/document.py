@@ -79,12 +79,16 @@ class Resource:
     """ Piece directory """
     slug: str = None
     """ Piece slug, defaults to directory name """
-    description_path: Path = None
-    """ Path to description file, defaults to index.md """
+    _description_path: Path = None
+    description_path: dataclasses.InitVar[Path] = None
+    """ Path to description file, defaults to slug.md or index.md """
 
-    def __post_init__(self):
+    def __post_init__(self, description_path: Path = None):
         if not self.slug:
             self.slug = sluggify(self.path.stem)
+        if description_path is not None:
+            self._description_path = description_path
+
 
     @classmethod
     def from_path(cls, path: Path):
@@ -98,16 +102,19 @@ class Resource:
         return [p for p in self.path.iterdir() if p.suffix not in ('.md', '.html', '')]
 
     @functools.cached_property
+    def description_path(self) -> Path | None:
+        if (p := self.path / 'index.md').exists():
+            return p
+        if (p := self.path / f'{self.slug}.md').exists():
+            return p
+        if p := next(self.path.glob('.md'), None):
+            return p
+        return None
+
+
+    @functools.cached_property
     def description(self) -> Document:
-        if self.description_path:
-            pass
-        elif (p := self.path / 'index.md').exists():
-            self.description_path = p
-        elif (p := self.path / f'{self.slug}.md').exists():
-            self.description_path = p
-        elif p := next(self.path.glob('.md'), None):
-            self.description_path = p
-        else:
+        if not self.description_path:
             logging.debug('generating default description for %s/%s', self.DIRECTORY, self.slug)
             return self._generate_description()
         return Document.load_file(self.description_path)
