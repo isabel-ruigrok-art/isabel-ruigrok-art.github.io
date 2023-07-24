@@ -1,12 +1,12 @@
 :root {
-    --accent-color: #859900;
-    --background-color-1: #fdf6e3;
-    --background-color-2: #eee8d5;
+    --accent-color: #857502;
+    --background-color-1: #ffffff;
+    --background-color-2: #f4eff8;
     --text-color-1: #657b83;
     --text-color-2: #586e75;
     --shadow-color: #cccccc;
-    --font-sans: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif;
-    --font-serif: ui-serif, serif;
+    --font-sans: Verdana, sans-serif;
+    --font-serif: Georgia, serif;
     --font-mono: Dank Mono, Operator Mono, Inconsolata, Fira Mono, ui-monospace, SF Mono, Monaco, Droid Sans Mono, Source Code Pro, monospace;
 }
 
@@ -30,7 +30,7 @@ p {
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-sans);
+    font-family: var(--font-serif);
     color: var(--text-color-2);
     font-weight: 600;
     line-height: 1.2;
@@ -125,7 +125,11 @@ nav {
     padding-block: 0.5rem;
     padding-inline: 2rem;
     gap: 2rem;
-    border-bottom: 1px solid var(--background-color-2);
+    border-bottom: 1px solid var(--text-color-2);
+}
+
+nav a {
+    color: var(--text-color-2);
 }
 
 /* #profile-picture */
