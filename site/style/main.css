@@ -144,37 +144,32 @@ nav a {
 /* .gallery */
 
 .gallery {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1em;
 }
 
-.gallery>* {
-    flex: 1 1 calc(max(12rem, 30%));
-    height: fit-content;
-    color: inherit;
+.gallery > a {
+    display: contents;
 }
 
 .gallery figure {
-    padding: 0;
+    margin-inline: 0;
     background: var(--background-color-2);
     border-radius: 0.5rem;
     transition: box-shadow 0.5s ease-in-out;
-    margin: 0;
+
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 2em;
+}
+
+.gallery figure > * {
+    margin: auto;
 }
 
 .gallery>*:hover>figure {
     box-shadow: var(--shadow-color) 0 0 0.5rem;
-}
-
-.gallery>*.wide {
-    flex: 1 1 calc(max(12rem, 60%));
-}
-
-.gallery img {
-    width: 100%;
-    height: auto;
 }
 
 .gallery figcaption {
