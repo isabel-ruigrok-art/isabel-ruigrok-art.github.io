@@ -109,8 +109,11 @@ video {
 }
 
 .headline {
+    max-height: 100vh;
     box-sizing: border-box;
-    width: 100%;
+    float: left;
+    margin-inline-end: 2rem;
+    margin-block-end: 2rem;
 }
 
 .fullwidth {
