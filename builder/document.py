@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import dataclasses
 import functools
 import logging
@@ -35,6 +36,13 @@ def extract_title(body: ET.Element, include_markup: bool = False) -> str | None:
     if include_markup:
         raise NotImplementedError()
     return h.text
+
+
+def identify_thumbnail_image(body: ET.Element) -> tuple[ET.Element, ET.Element] | None:
+    for el in body:
+        if (img := el.find('img')) is not None:
+            return el, img
+    return None
 
 
 def identify_headline_image(body: ET.Element) -> tuple[ET.Element, ET.Element] | None:
@@ -156,7 +164,8 @@ class Document:
         inner_html = markdown_parser.reset().convert(text)
         metadata = getattr(markdown_parser, 'Meta', None) or {}
         root = ET.fromstring(''.join(('<html>', inner_html, '</html>')), parser=xml_parser)
-        img = pop_headline_image(root)
+        img = (identify_headline_image(root) or identify_thumbnail_image(root) or (None, None))[1]
+        img = copy.deepcopy(img)
 
         instance = cls(slug, root, metadata=metadata, headline_image=img)
         if instance.slug is None:

@@ -27,7 +27,8 @@ def build_resource(resource: Resource) -> Path:
     page = page_template.render(
         title=description.title,
         description=description.inner_html(),
-        headline=ET.tostring(description.headline_image, encoding='unicode')
+        headline=ET.tostring(description.headline_image, encoding='unicode') if
+        description.headline_image is not None and 'headline' in description.headline_image.get('class', '').split() else ''
     )
 
     logging.info('%s -> %s', resource.slug, page_file)

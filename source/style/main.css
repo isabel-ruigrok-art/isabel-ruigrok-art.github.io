@@ -1,12 +1,12 @@
 :root {
-    --accent-color: #859900;
-    --background-color-1: #fdf6e3;
-    --background-color-2: #eee8d5;
+    --accent-color: #857502;
+    --background-color-1: #ffffff;
+    --background-color-2: #f4eff8;
     --text-color-1: #657b83;
     --text-color-2: #586e75;
     --shadow-color: #cccccc;
-    --font-sans: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif;
-    --font-serif: ui-serif, serif;
+    --font-sans: Verdana, sans-serif;
+    --font-serif: Georgia, serif;
     --font-mono: Dank Mono, Operator Mono, Inconsolata, Fira Mono, ui-monospace, SF Mono, Monaco, Droid Sans Mono, Source Code Pro, monospace;
 }
 
@@ -30,7 +30,7 @@ p {
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-sans);
+    font-family: var(--font-serif);
     color: var(--text-color-2);
     font-weight: 600;
     line-height: 1.2;
@@ -109,8 +109,11 @@ video {
 }
 
 .headline {
+    max-height: 100vh;
     box-sizing: border-box;
-    width: 100%;
+    float: left;
+    margin-inline-end: 2rem;
+    margin-block-end: 2rem;
 }
 
 .fullwidth {
@@ -125,7 +128,11 @@ nav {
     padding-block: 0.5rem;
     padding-inline: 2rem;
     gap: 2rem;
-    border-bottom: 1px solid var(--background-color-2);
+    border-bottom: 1px solid var(--text-color-2);
+}
+
+nav a {
+    color: var(--text-color-2);
 }
 
 /* #profile-picture */
@@ -138,37 +145,32 @@ nav {
 /* .gallery */
 
 .gallery {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1em;
 }
 
-.gallery>* {
-    flex: 1 1 calc(max(12rem, 30%));
-    height: fit-content;
-    color: inherit;
+.gallery > a {
+    display: contents;
 }
 
 .gallery figure {
-    padding: 0;
+    margin-inline: 0;
     background: var(--background-color-2);
     border-radius: 0.5rem;
     transition: box-shadow 0.5s ease-in-out;
-    margin: 0;
+
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 2em;
+}
+
+.gallery figure > * {
+    margin: auto;
 }
 
 .gallery>*:hover>figure {
     box-shadow: var(--shadow-color) 0 0 0.5rem;
-}
-
-.gallery>*.wide {
-    flex: 1 1 calc(max(12rem, 60%));
-}
-
-.gallery img {
-    width: 100%;
-    height: auto;
 }
 
 .gallery figcaption {
