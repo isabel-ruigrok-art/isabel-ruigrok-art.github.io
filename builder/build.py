@@ -11,7 +11,8 @@ from xml.etree import ElementTree as ET
 
 import jinja2
 
-from document import Document, Piece, Project, Resource
+from document import Document
+from resources import Resource, Piece, Project
 from config import CONFIG
 
 jinja_environment = jinja2.Environment(
