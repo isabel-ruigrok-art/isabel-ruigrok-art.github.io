@@ -7,7 +7,6 @@ import os
 import shutil
 from pathlib import Path
 from typing import Iterable
-from xml.etree import ElementTree as ET
 
 import jinja2
 
@@ -27,9 +26,7 @@ def build_resource(resource: Resource) -> Path:
     description = resource.description
     page = page_template.render(
         title=description.title,
-        description=description.inner_html(),
-        headline=ET.tostring(description.headline_image, encoding='unicode') if
-        description.headline_image is not None and 'headline' in description.headline_image.get('class', '').split() else ''
+        content=description.inner_html()
     )
 
     logging.info('%s -> %s', resource.slug, page_file)
@@ -45,11 +42,11 @@ def build_resource(resource: Resource) -> Path:
 def gallery_item(resource: Resource) -> dict:
     description = resource.description
     # TODO: automatically determine this from image dimensions
-    is_wide = 'wide' in description.headline_image.get('class', '').split()
+    is_wide = 'wide' in description.primary_image.get('class', '').split()
     return dict(
         link=str(Path('/') / resource.DIRECTORY / resource.slug),
         title=description.title,
-        image_src=description.headline_image.get('src'),
+        image_src=description.primary_image.get('src'),
         wide=is_wide
     )
 

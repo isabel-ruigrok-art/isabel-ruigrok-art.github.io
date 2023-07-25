@@ -18,9 +18,9 @@ def make_headline_image(src: str, alt: str, wide: bool = False) -> ET.Element:
     img.set('src', str(src))
     img.set('alt', alt)
     if wide:
-        img.set('class', 'wide headline')
+        img.set('class', 'wide')
     else:
-        img.set('class', 'headline')
+        img.set('class', 'tall')
     return img
 
 
@@ -74,16 +74,21 @@ class Resource:
 
     def _generate_description(self) -> Document:
         """ generate a simple description document for when no index.md is present. """
+        body = ET.fromstring(f'<html><section><h1>{self.slug}</h1></section></html>')
+
         if not self.assets:
             headline_img = None
         else:
             path = next((p for p in self.assets if sluggify(p.stem) == self.slug), self.assets[0])
             headline_img = make_headline_image(str(path.relative_to(self.path)), alt=str(path.stem), wide=is_wide(path))
+            div = body.makeelement('div', {'class': 'headline'})
+            div.append(headline_img)
+            body.insert(0, div)
 
         return Document(
             self.slug,
-            ET.fromstring(f'<html><h1>{self.slug}</h1></html>'),
-            headline_image=headline_img
+            body,
+            primary_image=headline_img
         )
 
 
