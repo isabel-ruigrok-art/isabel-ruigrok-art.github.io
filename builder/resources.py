@@ -3,25 +3,11 @@ from __future__ import annotations
 import dataclasses
 import functools
 import logging
-
 from pathlib import Path
 from typing import ClassVar
-from xml.etree import ElementTree as ET
 
 from document import Document
 from util import sluggify, is_wide
-
-
-def make_headline_image(src: str, alt: str, wide: bool = False) -> ET.Element:
-    """ make an `img.headline` element with the given src and alt text, and optionally the 'wide' class. """
-    img = ET.Element('img')
-    img.set('src', str(src))
-    img.set('alt', alt)
-    if wide:
-        img.set('class', 'wide')
-    else:
-        img.set('class', 'tall')
-    return img
 
 
 @dataclasses.dataclass
@@ -74,22 +60,16 @@ class Resource:
 
     def _generate_description(self) -> Document:
         """ generate a simple description document for when no index.md is present. """
-        body = ET.fromstring(f'<html><section><h1>{self.slug}</h1></section></html>')
-
         if not self.assets:
-            headline_img = None
+            headline_img = ''
         else:
             path = next((p for p in self.assets if sluggify(p.stem) == self.slug), self.assets[0])
-            headline_img = make_headline_image(str(path.relative_to(self.path)), alt=str(path.stem), wide=is_wide(path))
-            div = body.makeelement('div', {'class': 'headline'})
-            div.append(headline_img)
-            body.insert(0, div)
-
-        return Document(
-            self.slug,
-            body,
-            primary_image=headline_img
-        )
+            alt = path.stem
+            relative_path = path.relative_to(self.path)
+            classes = '.wide .headline' if is_wide(path) else '.headline'
+            headline_img = f'![{alt}]({relative_path}){{{classes}}}'
+        md = f'{headline_img}\n# {self.slug}'
+        return Document.from_string(md, slug=self.slug)
 
 
 @dataclasses.dataclass
