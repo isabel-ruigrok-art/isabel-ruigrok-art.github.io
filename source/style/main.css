@@ -8,6 +8,9 @@
     --font-sans: Verdana, sans-serif;
     --font-serif: Georgia, serif;
     --font-mono: Dank Mono, Operator Mono, Inconsolata, Fira Mono, ui-monospace, SF Mono, Monaco, Droid Sans Mono, Source Code Pro, monospace;
+
+    --content-width-1: clamp(18rem, 90%, 800px);
+    --content-width-2: clamp(18rem, 90%, 90%);
 }
 
 /* Text */
@@ -59,7 +62,7 @@ body {
 
 
 section, nav, footer {
-    width: clamp(18rem, 90%, 800px);
+    width: var(--content-width-1);
     margin-inline: auto;
 }
 
@@ -73,7 +76,7 @@ section:first-of-type {
 }
 
 section.extrawide {
-    width: clamp(18rem, 90%, 90%);
+    width: var(--content-width-2);
 }
 
 img,
@@ -109,8 +112,15 @@ video {
 }
 
 .headline {
+    inline-size: 100%;
+    text-align: center;
+}
+
+.headline img {
+    object-fit: contain;
+    min-width: var(--content-width-1);
+    max-width: 100vw;
     max-height: 100vh;
-    width: 100%;
 }
 
 .fullwidth {
