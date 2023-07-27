@@ -3,7 +3,7 @@
         <figure class="{{ 'wide' if wide else 'tall' }}">
             <img src="{{ image_src }}" alt="{{ title }}">
             <figcaption>
-                <h3>{{ title }}</h3>
+                <h3>{{ title | morebreaks }}</h3>
                 {% if properties %}
                     <ul>
                         {% for property in properties -%}

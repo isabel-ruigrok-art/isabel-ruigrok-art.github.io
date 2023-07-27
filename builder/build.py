@@ -1,9 +1,11 @@
 #!/bin/env python3
 from __future__ import annotations
 
+import functools
 import itertools
 import logging
 import os
+import re
 import shutil
 from pathlib import Path
 from typing import Iterable
@@ -17,6 +19,10 @@ from config import CONFIG
 jinja_environment = jinja2.Environment(
     loader=jinja2.FileSystemLoader(CONFIG.templates_dir)
 )
+
+# Add zero width spaces around sequences of non-alphanumerical characters in sequences of alphanumerical characters.
+# e.g. 'tekeningen/schilderijen' -> 'tekeningen[ZWSP]/[ZWSP]schilderijen'
+jinja_environment.filters['morebreaks'] = functools.partial(re.sub, re.compile(r"(\w{2,})([^\w\s'-]+)(\w{2,})"), r'\1​\2​\3')
 
 
 def build_resource(resource: Resource) -> Path:
