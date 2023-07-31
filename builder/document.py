@@ -100,12 +100,11 @@ class Document:
         return cls.from_string(path.read_text(), slug=sluggify(path.stem))
 
     @classmethod
-    def from_string(cls, text: str, slug: str | None = None, *,
-                    markdown_parser: markdown.Markdown = markdown_parser,
-                    xml_parser: ET.XMLParser = None) -> Document:
+    def from_string(cls, text: str, slug: str | None = None) -> Document:
         inner_html = markdown_parser.reset().convert(text)
         metadata = getattr(markdown_parser, 'Meta', None) or {}
         root = ET.fromstring(''.join(('<html>', inner_html, '</html>')), parser=xml_parser)
+        root = ET.fromstring(''.join(('<html>', inner_html, '</html>')))
         # deep copy to avoid problems with double-rewriting urls.
         img = copy.deepcopy(identify_primary_image(root))
 
