@@ -2,14 +2,15 @@ from __future__ import annotations
 
 import copy
 import dataclasses
+import datetime
 import functools
 from pathlib import Path
-from typing import Callable, Iterable
+from typing import Callable, Iterable, Any, ClassVar
 from xml.etree import ElementTree as ET
 
 import markdown
 
-from util import sluggify
+from util import sluggify, get_slug_and_optional_date
 
 markdown_parser = markdown.Markdown(extensions=['meta', 'extra'])
 
@@ -93,6 +94,11 @@ class Document:
     """ image used in preview and at the top of page """
     metadata: dict[str] = dataclasses.field(default_factory=dict)
 
+    METADATA_TRANSFORMERS: ClassVar[dict[str, Callable[[str], Any]]] = {
+        'date': datetime.date.fromisoformat
+    }
+    """ functions applied to markdown metadata with matching keys """
+
     @classmethod
     def load_file(cls, path: Path, default_metadata: dict = {}, metadata_overrides: dict = {}):
         """ Create a Document from a path to markdown source
@@ -104,7 +110,10 @@ class Document:
         """
         if path.suffix not in ('.md', '.html', '.htm'):
             raise ValueError(f'Document.load_file() expects a markdown file, got {path}')
-        return cls.from_string(path.read_text(), slug=sluggify(path.stem), default_metadata=default_metadata, metadata_overrides=metadata_overrides)
+        slug, date = get_slug_and_optional_date(path.stem)
+        if date is not None:
+            metadata_overrides = {'date': date, **metadata_overrides}
+        return cls.from_string(path.read_text(), slug=slug, default_metadata=default_metadata, metadata_overrides=metadata_overrides)
 
     @classmethod
     def from_string(cls, text: str, slug: str | None = None, *, default_metadata: dict = {}, metadata_overrides: dict = {}) -> Document:
@@ -118,6 +127,7 @@ class Document:
         """
         inner_html = markdown_parser.reset().convert(text)
         document_metadata = getattr(markdown_parser, 'Meta', None) or {}
+        cls.transform_document_metadata(document_metadata)
         metadata = {**default_metadata, **document_metadata, **metadata_overrides}
         root = ET.fromstring(''.join(('<html>', inner_html, '</html>')))
         # deep copy to avoid problems with double-rewriting urls.
@@ -143,3 +153,12 @@ class Document:
             el.set('src', fn(el.get('src')))
         for el in self.root.iter('a'):
             el.set('href', fn(el.get('href')))
+
+
+    @classmethod
+    def transform_document_metadata(cls, metadata: dict):
+        for key, value in metadata.items():
+            value = '\n'.join(value)  # lines are split for some reason
+            if key in cls.METADATA_TRANSFORMERS:
+                value = cls.METADATA_TRANSFORMERS[key](value)
+            metadata[key] = value

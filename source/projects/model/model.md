@@ -1,3 +1,7 @@
+---
+date: 2023-03-30
+---
+
 # Model tekeningen/schilderijen
 ![](../../images/model-1.jpeg){.fullwidth}
 

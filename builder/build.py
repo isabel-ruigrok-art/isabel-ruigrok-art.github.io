@@ -1,6 +1,7 @@
 #!/bin/env python3
 from __future__ import annotations
 
+import datetime
 import functools
 import itertools
 import logging
@@ -70,7 +71,8 @@ def build_resources_index(resources: Iterable[Resource], kind: type[Resource] | 
 def build_homepage(projects: Iterable[Project], output_path: Path = Path('index.html')) -> Path:
     output_path = output_path if output_path.is_absolute() else CONFIG.output_dir / output_path
     template = jinja_environment.get_template('index.html')
-    newest_projects = itertools.islice(projects, 6)  # TODO: use date metadata
+    VERY_SMALL_DATE = datetime.date(1, 1, 1)
+    newest_projects = itertools.islice(sorted(projects, key=lambda p: p.description.metadata.get('date', VERY_SMALL_DATE), reverse=True), 6)
     page = template.render(items=(gallery_item(project) for project in newest_projects))
     logging.info('-> %s', output_path)
     output_path.write_text(page)
