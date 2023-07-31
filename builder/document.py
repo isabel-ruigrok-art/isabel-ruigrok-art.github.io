@@ -107,8 +107,6 @@ class Document:
         metadata = getattr(markdown_parser, 'Meta', None) or {}
         root = ET.fromstring(''.join(('<html>', inner_html, '</html>')), parser=xml_parser)
         # deep copy to avoid problems with double-rewriting urls.
-        section_by_heading(root)
-        process_headline_image(root)
         img = copy.deepcopy(identify_primary_image(root))
 
         instance = cls(slug, root, metadata=metadata, primary_image=img)
