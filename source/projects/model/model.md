@@ -1,5 +1,5 @@
-![](../../images/model-1.jpeg){.wide}
 # Model tekeningen/schilderijen
+![](../../images/model-1.jpeg){.fullwidth}
 
 (Dankjewel [@noahmasengi](https://www.instagram.com/noahmasengi/) voor de eerste foto 🎞)
 
