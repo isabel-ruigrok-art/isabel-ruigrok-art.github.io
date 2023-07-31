@@ -46,7 +46,7 @@ class Resource:
             return p
         if (p := self.path / f'{self.slug}.md').exists():
             return p
-        if p := next(self.path.glob('.md'), None):
+        if p := next(self.path.glob('*.md'), None):
             return p
         return None
 
