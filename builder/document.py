@@ -94,16 +94,31 @@ class Document:
     metadata: dict[str] = dataclasses.field(default_factory=dict)
 
     @classmethod
-    def load_file(cls, path: Path):
+    def load_file(cls, path: Path, default_metadata: dict = {}, metadata_overrides: dict = {}):
+        """ Create a Document from a path to markdown source
+
+        :param path: path to .md file
+        :param default_metadata: metadata which will be overwritten by metadata extracted from the document
+        :param metadata_overrides: metadata which will overwrite metadata extracted from the document
+        :return: A new Document. Slug is based on the filename.
+        """
         if path.suffix not in ('.md', '.html', '.htm'):
             raise ValueError(f'Document.load_file() expects a markdown file, got {path}')
-        return cls.from_string(path.read_text(), slug=sluggify(path.stem))
+        return cls.from_string(path.read_text(), slug=sluggify(path.stem), default_metadata=default_metadata, metadata_overrides=metadata_overrides)
 
     @classmethod
-    def from_string(cls, text: str, slug: str | None = None) -> Document:
+    def from_string(cls, text: str, slug: str | None = None, *, default_metadata: dict = {}, metadata_overrides: dict = {}) -> Document:
+        """ Create a Document from Markdown source text.
+
+        :param text: Markdown source
+        :param slug: document identifier. Defaults to document title.
+        :param default_metadata: metadata which will be overwritten by metadata extracted from the document
+        :param metadata_overrides: metadata which will overwrite metadata extracted from the document
+        :return: A new Document.
+        """
         inner_html = markdown_parser.reset().convert(text)
-        metadata = getattr(markdown_parser, 'Meta', None) or {}
-        root = ET.fromstring(''.join(('<html>', inner_html, '</html>')), parser=xml_parser)
+        document_metadata = getattr(markdown_parser, 'Meta', None) or {}
+        metadata = {**default_metadata, **document_metadata, **metadata_overrides}
         root = ET.fromstring(''.join(('<html>', inner_html, '</html>')))
         # deep copy to avoid problems with double-rewriting urls.
         img = copy.deepcopy(identify_primary_image(root))
