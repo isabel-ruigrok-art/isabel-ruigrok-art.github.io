@@ -61,7 +61,7 @@ def _get_config() -> Config:
     import argparse
     import sys
     import warnings
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument('-c', '--config', type=Path)
     args, unparsed = parser.parse_known_args()
     sys.argv = [sys.argv[0], *unparsed]  # ⚠️
