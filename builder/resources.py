@@ -1,13 +1,20 @@
 from __future__ import annotations
 
+import copy
 import dataclasses
 import functools
 import logging
+import urllib.parse
 from pathlib import Path
 from typing import ClassVar
 
 from document import Document
 from util import sluggify, is_wide
+
+
+def is_relative_url(url: str):
+    url = urllib.parse.urlsplit(url, scheme='file')
+    return url.scheme == 'file' and not url.path.startswith('/')
 
 
 @dataclasses.dataclass
@@ -27,7 +34,6 @@ class Resource:
             self.slug = sluggify(self.path.stem)
         if description_path is not None:
             self._description_path = description_path
-
 
     @classmethod
     def from_path(cls, path: Path):
@@ -50,13 +56,24 @@ class Resource:
             return p
         return None
 
-
     @functools.cached_property
     def description(self) -> Document:
         if not self.description_path:
             logging.debug('generating default description for %s/%s', self.DIRECTORY, self.slug)
             return self._generate_description()
         return Document.load_file(self.description_path)
+
+    @functools.cached_property
+    def description_with_absolute_urls(self) -> Document:
+        doc = copy.deepcopy(self.description)
+
+        def fn(url: str):
+            if not is_relative_url(url):
+                return url
+            return str((Path('/') / self.DIRECTORY / self.slug / url).resolve())
+
+        doc.rewrite_urls(fn)
+        return doc
 
     def _generate_description(self) -> Document:
         """ generate a simple description document for when no index.md is present. """

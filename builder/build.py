@@ -47,7 +47,7 @@ def build_resource(resource: Resource) -> Path:
 
 
 def gallery_item(resource: Resource) -> dict:
-    description = resource.description
+    description = resource.description_with_absolute_urls
     # TODO: automatically determine this from image dimensions
     is_wide = 'wide' in description.primary_image.get('class', '').split()
     return dict(
@@ -146,20 +146,6 @@ def main():
         for piece in pieces:
             build_resource(piece)
     if args.should_update_gallery:
-        for resource in itertools.chain(projects, pieces):
-            # todo: make this less hacky
-            def fn(url):
-                if ':' in url:  # should really use urlparse, but this is good enough for now
-                    return url
-                if url.startswith('/'):
-                    return url
-                # FIXME: this assumes input and output directories have the same structure
-                absolute = (resource.path / url).resolve()
-                try:
-                    return absolute.relative_to(CONFIG.input_dir / resource.DIRECTORY).as_posix()
-                except ValueError:
-                    return '/' + absolute.relative_to(CONFIG.input_dir).as_posix()
-            resource.description.rewrite_urls(fn)
         build_resources_index(projects, kind=Project)
         build_resources_index(pieces, kind=Piece)
         build_homepage(projects)
