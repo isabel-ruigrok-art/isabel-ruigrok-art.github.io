@@ -1,6 +1,6 @@
 # Heel chaotisch
-![chaotisch](../../images/chaotisch-1.jpeg){.fullwidth}
+![chaotisch](chaotisch-1.jpeg){.fullwidth}
 
-![chaotisch](../../images/chaotisch-2.jpeg){.fullwidth}
+![chaotisch](chaotisch-2.jpeg){.fullwidth}
 
-![chaotisch](../../pieces/chaotisch/chaotisch.jpeg){.fullwidth}
+![chaotisch](/pieces/chaotisch/chaotisch.jpeg){.fullwidth}
