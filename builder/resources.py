@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import ClassVar
 
 from document import Document
-from util import sluggify, is_wide
+from util import sluggify, is_wide, get_slug_and_optional_date
 
 
 def is_relative_url(url: str):
@@ -48,13 +48,17 @@ class Resource:
 
     @functools.cached_property
     def description_path(self) -> Path | None:
-        if (p := self.path / 'index.md').exists():
+        candidates = set(self.path.glob('*.md'))
+        if len(candidates) <= 1:
+            return next(iter(candidates), None)
+        if (p := self.path / 'index.md') in candidates:
             return p
-        if (p := self.path / f'{self.slug}.md').exists():
+        if (p := self.path / f'{self.slug}.md') in candidates:
             return p
-        if p := next(self.path.glob('*.md'), None):
+        if p := next((p for p in candidates if get_slug_and_optional_date(p.stem)[0] == self.slug), None):
             return p
-        return None
+        else:
+            return min(candidates, default=None)
 
     @functools.cached_property
     def description(self) -> Document:
