@@ -164,7 +164,6 @@ nav a {
 
 .gallery figure {
     margin-inline: 0;
-    background: var(--background-color-2);
     border-radius: 0.5rem;
     transition: box-shadow 0.5s ease-in-out;
 
