@@ -136,6 +136,11 @@ video {
     width: 50%;
 }
 
+/* FIXME: floating images may have different margin than adjacent text leading to bad spacing. */
+.watmeermarge {
+    margin-top: 1rem;
+}
+
 /* # nav */
 
 nav {
