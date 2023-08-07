@@ -98,6 +98,11 @@ video {
     max-width: 50%;
 }
 
+.center {
+    margin-inline: auto;
+    display: block;
+}
+
 @media screen and (max-width: 40rem) {
     .left,
     .right {
@@ -125,6 +130,10 @@ video {
 
 .fullwidth {
     width: 100%;
+}
+
+.halfwidth {
+    width: 50%;
 }
 
 /* # nav */
