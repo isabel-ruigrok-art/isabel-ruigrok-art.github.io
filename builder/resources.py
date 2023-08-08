@@ -43,7 +43,7 @@ class Resource:
             return cls(path)
 
     @functools.cached_property
-    def assets(self) -> list[Path]:
+    def asset_paths(self) -> list[Path]:
         return [p for p in self.path.iterdir() if p.suffix not in ('.md', '.html', '')]
 
     @functools.cached_property
@@ -81,10 +81,10 @@ class Resource:
 
     def _generate_description(self) -> Document:
         """ generate a simple description document for when no index.md is present. """
-        if not self.assets:
+        if not self.asset_paths:
             headline_img = ''
         else:
-            path = next((p for p in self.assets if sluggify(p.stem) == self.slug), self.assets[0])
+            path = next((p for p in self.asset_paths if sluggify(p.stem) == self.slug), self.asset_paths[0])
             alt = path.stem
             relative_path = path.relative_to(self.path)
             classes = '.wide .headline' if is_wide(path) else '.headline'

@@ -13,6 +13,7 @@ from typing import Iterable
 
 import jinja2
 
+from assets import Asset
 from document import Document
 from resources import Resource, Piece, Project
 from config import CONFIG
@@ -39,10 +40,8 @@ def build_resource(resource: Resource) -> Path:
     logging.info('%s -> %s', resource.slug, page_file)
     page_dir.mkdir(exist_ok=True, parents=True)
     page_file.write_text(page)
-    for asset in resource.assets:
-        # TODO: avoid unnecessary copying
-        logging.info('%s -> %s', asset, page_dir / asset.name)
-        shutil.copy(asset, page_dir / asset.name)
+    for asset in map(Asset, resource.asset_paths):
+        asset.to_dir(page_dir)
     return page_file
 
 
@@ -115,6 +114,7 @@ def main():
     parser.add_argument('targets', type=Path, nargs='*',
                         help='project .md files to build / include in gallery.\n'
                              'if not given, includes all .md files in the projects directory.')
+    parser.add_argument('--clean', action=argparse.BooleanOptionalAction, dest='should_clean', default=False, help='clean output directory before building')
     parser.add_argument('--project-pages', action=argparse.BooleanOptionalAction, dest='should_build_project_pages', default=True, help='build project pages')
     parser.add_argument('--piece-pages', action=argparse.BooleanOptionalAction, dest='should_build_piece_pages', default=True, help='build piece pages')
     parser.add_argument('--gallery', action=argparse.BooleanOptionalAction, dest='should_update_gallery', default=True, help='update project index and homepage')
@@ -136,6 +136,9 @@ def main():
     else:
         projects = [Project.from_path(file) for file in CONFIG.projects_dir.iterdir()]
         pieces = [Piece.from_path(file) for file in CONFIG.pieces_dir.iterdir()]
+
+    if args.should_clean:
+        shutil.rmtree(CONFIG.output_dir, ignore_errors=True)
 
     if args.should_build_project_pages:
         for project in projects:
