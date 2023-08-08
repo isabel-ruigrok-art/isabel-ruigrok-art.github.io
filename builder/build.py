@@ -68,12 +68,10 @@ def build_resources_index(resources: Iterable[Resource], kind: type[Resource] | 
     return output_path
 
 
-def build_homepage(projects: Iterable[Project], output_path: Path = Path('index.html')) -> Path:
+def build_homepage(output_path: Path = Path('index.html')) -> Path:
     output_path = output_path if output_path.is_absolute() else CONFIG.output_dir / output_path
     template = jinja_environment.get_template('index.html')
-    VERY_SMALL_DATE = datetime.date(1, 1, 1)
-    newest_projects = itertools.islice(sorted(projects, key=lambda p: p.description.metadata.get('date', VERY_SMALL_DATE), reverse=True), 6)
-    page = template.render(items=(gallery_item(project) for project in newest_projects))
+    page = template.render()
     logging.info('-> %s', output_path)
     output_path.write_text(page)
     return output_path
@@ -148,11 +146,10 @@ def main():
     if args.should_update_gallery:
         build_resources_index(projects, kind=Project)
         build_resources_index(pieces, kind=Piece)
-        build_homepage(projects)
     if args.should_sync_static:
         for static_path in CONFIG.static_paths:
             sync_static_path(static_path)
-
+    build_homepage()
 
 if __name__ == '__main__':
     main()
