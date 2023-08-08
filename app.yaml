@@ -7,3 +7,7 @@ handlers:
 
 - url: /
   static_dir: generated/
+
+- url: /(pieces|projects)/?$
+  static_files: generated/\1/index.html
+  upload: generated/(pieces|projects)/index.html
