@@ -1,4 +1,8 @@
 {% extends "page.html" %}
+{% block head -%}
+    {{- super() -}}
+    <link rel="stylesheet" href="/style/about.css">
+{%- endblock head %}
 {% block title %} Isabel Ruigrok {% endblock title %}
 {% block main %}
     <section id="about">

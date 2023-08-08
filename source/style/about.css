@@ -1,0 +1,36 @@
+/* #profile-picture */
+#profile-picture {
+    clip-path: circle(50%);
+    width: 200px;
+    height: auto;
+}
+
+/* About */
+
+#about {
+    display: grid;
+    column-gap: 1rem;
+    grid-template-areas:
+        "h h"
+        "l r"
+;
+    grid-template-columns: 20% 1fr;
+}
+
+@media screen and (max-width: 40rem) {
+    #about {
+        display: block;
+    }
+}
+
+#about > h2 {
+    grid-area: h;
+}
+
+#about > #profile-picture {
+    grid-area: l;
+}
+
+#about > div {
+    grid-area: r
+}

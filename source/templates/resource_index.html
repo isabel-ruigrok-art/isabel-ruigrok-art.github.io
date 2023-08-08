@@ -1,5 +1,8 @@
 {% extends "page.html" %}
-
+{% block head -%}
+    {{- super() -}}
+    <link rel="stylesheet" href="/style/gallery.css">
+{%- endblock head %}
 {% block main %}
 <section class="extrawide">
 {% include "gallery.html" %} {# expects items #}

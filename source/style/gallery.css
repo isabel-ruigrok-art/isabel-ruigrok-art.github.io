@@ -1,0 +1,38 @@
+/* .gallery */
+
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(auto, 300px));
+    gap: 1em;
+    justify-content: center;
+}
+
+.gallery > a {
+    display: contents;
+}
+
+.gallery figure {
+    margin-inline: 0;
+    border-radius: 0.5rem;
+    transition: box-shadow 0.5s ease-in-out;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.gallery figure > * {
+    margin: auto;
+}
+
+.gallery>*:hover>figure {
+    box-shadow: var(--shadow-color) 0 0 0.5rem;
+}
+
+.gallery figcaption {
+    padding: 0 1rem 0.5rem 1rem;
+    text-align: center;
+}
+
+.gallery figcaption :first-child {
+    margin-block-start: 0.25rem;
+}
