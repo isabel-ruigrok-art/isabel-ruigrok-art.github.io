@@ -4,6 +4,7 @@ import copy
 import dataclasses
 import datetime
 import functools
+import urllib.parse
 from pathlib import Path
 from typing import Callable, Iterable, Any, ClassVar
 from xml.etree import ElementTree as ET
@@ -85,6 +86,20 @@ def process_headline_image(body: ET.Element) -> None:
                 el.set('class', ' '.join(classes))
 
 
+def mutate_image_to_picture(el: ET.Element) -> ET.Element:
+    """ change an <img> element to a <picture> element with <source> and <img> children in-place. """
+    src = urllib.parse.urlsplit(el.get('src'))
+    path = Path(src.path)
+    webp_url = urllib.parse.urlunsplit(src._replace(path=str(path.with_suffix('.webp'))))
+    fallback_url = urllib.parse.urlunsplit(src._replace(path=str(path.with_suffix('.jpg')))) if path.suffix == '.webp' else el.get('src')
+
+    el.tag = 'picture'
+    ET.SubElement(el, 'source', srcset=webp_url, type='image/webp')
+    ET.SubElement(el, 'img', attrib=el.attrib, src=fallback_url)
+    el.attrib = {}
+    return el
+
+
 @dataclasses.dataclass
 class Document:
     slug: str
@@ -131,9 +146,12 @@ class Document:
         metadata = {**default_metadata, **document_metadata, **metadata_overrides}
         root = ET.fromstring(''.join(('<html>', inner_html, '</html>')))
         # deep copy to avoid problems with double-rewriting urls.
-        img = copy.deepcopy(identify_primary_image(root))
+        primary_image = copy.deepcopy(identify_primary_image(root))
+        for img in list(root.iter('img')):
+            mutate_image_to_picture(img)
+        mutate_image_to_picture(primary_image)
 
-        instance = cls(slug, root, metadata=metadata, primary_image=img)
+        instance = cls(slug, root, metadata=metadata, primary_image=primary_image)
         if instance.slug is None:
             instance.slug = sluggify(instance.title)
         return instance
@@ -145,15 +163,18 @@ class Document:
     def inner_html(self):
         return ET.tostring(self.root, encoding='unicode').replace('<html>', '').replace('</html>', '')
 
-    def rewrite_urls(self, fn: Callable[[str], str]) -> None:
-        self.primary_image.set('src', fn(self.primary_image.get('src')))
-        for el in self.root.iter('img'):
-            if el is self.primary_image:
-                continue
+    @staticmethod
+    def _rewrite_urls(tree: ET.Element | ET.ElementTree, fn: Callable[[str], str]) -> None:
+        for el in tree.iter('img'):
             el.set('src', fn(el.get('src')))
-        for el in self.root.iter('a'):
+        for el in tree.iter('a'):
             el.set('href', fn(el.get('href')))
+        for el in tree.iter('source'):
+            el.set('srcset', ','.join(fn(src.strip()) for src in el.get('srcset').split(',')))
 
+    def rewrite_urls(self, fn: Callable[[str], str]) -> None:
+        self._rewrite_urls(self.root, fn)
+        self._rewrite_urls(self.primary_image, fn)
 
     @classmethod
     def transform_document_metadata(cls, metadata: dict):
@@ -162,3 +183,15 @@ class Document:
             if key in cls.METADATA_TRANSFORMERS:
                 value = cls.METADATA_TRANSFORMERS[key](value)
             metadata[key] = value
+
+    def iter_img_srcs(self) -> Iterable[str]:
+        """ iterate over all image urls referenced in the document. """
+        for el in self.root.iter():
+            if src := el.get('src'):
+                yield src
+            if srcset := el.get('srcset'):
+                yield from (src.strip() for src in srcset.split(','))
+
+    def iter_dependencies(self) -> Iterable[urllib.parse.SplitResult]:
+        """ iterate over all local image urls referenced in the document. """
+        return (url for src in self.iter_img_srcs() if not (url := urllib.parse.urlsplit(src)).netloc)

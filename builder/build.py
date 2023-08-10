@@ -8,10 +8,12 @@ import logging
 import os
 import re
 import shutil
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Iterable
 
 import jinja2
+import markupsafe
 
 from assets import Asset
 from document import Document
@@ -40,8 +42,15 @@ def build_resource(resource: Resource) -> Path:
     logging.info('%s -> %s', resource.slug, page_file)
     page_dir.mkdir(exist_ok=True, parents=True)
     page_file.write_text(page)
-    for asset in map(Asset, resource.asset_paths):
-        asset.to_dir(page_dir)
+    assets = {p.stem: Asset(p) for p in resource.asset_paths}
+    for dependency in description.iter_dependencies():
+        path = Path(dependency.path)
+        if not path.is_absolute():
+            path = page_dir / path
+        if path.stem in assets:
+            assets[path.stem].to(path)
+        else:
+            logging.warning('Missing asset %s', path)
     return page_file
 
 
@@ -52,7 +61,7 @@ def gallery_item(resource: Resource) -> dict:
     return dict(
         link=str(Path('/') / resource.DIRECTORY / resource.slug),
         title=description.title,
-        image_src=description.primary_image.get('src'),
+        picture=markupsafe.Markup(ET.tostring(description.primary_image, encoding='unicode')),
         wide=is_wide
     )
 

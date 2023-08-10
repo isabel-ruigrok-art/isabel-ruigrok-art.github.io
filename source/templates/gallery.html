@@ -1,7 +1,7 @@
-{% macro gallery_item(link, title, image_src, properties=None, wide=False) -%}
+{% macro gallery_item(link, title, picture, properties=None, wide=False) -%}
     <a href="{{ link }}">
         <figure class="{{ 'wide' if wide else 'tall' }}">
-            <img src="{{ image_src }}" alt="{{ title }}">
+            {{ picture }}
             <figcaption>
                 <h3>{{ title | morebreaks }}</h3>
                 {% if properties %}
