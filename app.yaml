@@ -5,9 +5,14 @@ handlers:
   static_files: generated/index.html
   upload: generated/index.html
 
+- url: /(.*)/
+  static_files: generated/\1/index.html
+  upload: generated/.*/index.html
+
+- url: /(.*)/(.*)/
+  static_files: generated/\1//\2/index.html
+  upload: generated/(pieces|projects)/.*/index.html
+
 - url: /
   static_dir: generated/
 
-- url: /(pieces|projects)/?$
-  static_files: generated/\1/index.html
-  upload: generated/(pieces|projects)/index.html
