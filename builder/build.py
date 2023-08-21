@@ -58,10 +58,11 @@ def gallery_item(resource: Resource) -> dict:
     description = resource.description_with_absolute_urls
     # TODO: automatically determine this from image dimensions
     is_wide = 'wide' in description.primary_image.get('class', '').split()
+    picture_html = markupsafe.Markup(re.sub(r'class="[^"]*"', '', ET.tostring(description.primary_image, encoding='unicode')))
     return dict(
         link=str(Path('/') / resource.DIRECTORY / resource.slug),
         title=description.title,
-        picture=markupsafe.Markup(ET.tostring(description.primary_image, encoding='unicode')),
+        picture=picture_html,
         wide=is_wide
     )
 
