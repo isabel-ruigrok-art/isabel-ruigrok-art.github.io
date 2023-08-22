@@ -16,7 +16,7 @@ import jinja2
 import markupsafe
 
 from assets import Asset
-from document import Document
+from document import Document, markdown_parser
 from resources import Resource, Piece, Project
 from config import CONFIG
 
@@ -80,7 +80,13 @@ def build_resources_index(resources: Iterable[Resource], kind: type[Resource] | 
 def build_homepage(output_path: Path = Path('index.html')) -> Path:
     output_path = output_path if output_path.is_absolute() else CONFIG.output_dir / output_path
     template = jinja_environment.get_template('index.html')
-    page = template.render()
+    about_path = CONFIG.homepage_dir / 'about.md'
+    if about_path.exists():
+        about = markdown_parser.convert(about_path.read_text())
+    else:
+        about = ''
+        logging.warning('no about.md found in %s', CONFIG.homepage_dir)
+    page = template.render(about=about)
     logging.info('-> %s', output_path)
     output_path.write_text(page)
     return output_path

@@ -18,6 +18,7 @@ class Config:
     static_paths: Collection[Path] = (input_dir / 'style', input_dir / 'script', input_dir / 'images')
     projects_dir: Path = input_dir / 'projects'
     pieces_dir: Path = input_dir / 'pieces'
+    homepage_dir: Path = input_dir / 'homepage'
     background_color: str = '#ffffff'
 
     def __post_init__(self):
@@ -54,6 +55,7 @@ class Config:
             input_dir=parser['paths'].getpath('input', cls.input_dir),
             projects_dir=parser['paths'].getpath('projects', cls.projects_dir),
             pieces_dir=parser['paths'].getpath('pieces', cls.pieces_dir),
+            homepage_dir=parser['paths'].getpath('homepage', cls.homepage_dir),
             static_paths=parser['paths'].getpathlist('static', cls.static_paths),
             background_color=parser['conversion'].get('background_color', cls.background_color)
         )
