@@ -1,5 +1,5 @@
 My name is Isabel Ruigrok and I am an artist based in The Netherlands.
-I am seventeen years old and currently in my second year of studying at HKU Fine Art.
+I am eighteen years old and currently in my second year of studying at HKU Fine Art.
 
 I like painting with loose dancing brush strokes and imagining the world of the painting I'm working on.
 I like when things have stories, and where craftsmanship tells them.
