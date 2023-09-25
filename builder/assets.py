@@ -8,6 +8,8 @@ import PIL.Image
 
 from config import CONFIG
 
+mimetypes.add_type('image/webp', '.webp')
+
 
 def is_up_to_date(source: Path, target: Path) -> bool:
     return target.exists() and target.stat().st_mtime >= source.stat().st_mtime
