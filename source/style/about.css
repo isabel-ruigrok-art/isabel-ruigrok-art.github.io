@@ -34,3 +34,12 @@
 #about > div {
     grid-area: r
 }
+
+.linkbox {
+    list-style: none;
+    padding-inline-start: 24px;
+}
+
+.linkbox.icon {
+    height: 1em;
+}
