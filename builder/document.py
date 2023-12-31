@@ -147,8 +147,8 @@ class Document:
         root = ET.fromstring(''.join(('<html>', inner_html, '</html>')))
         # deep copy to avoid problems with double-rewriting urls.
         primary_image = copy.deepcopy(identify_primary_image(root))
-        for img in list(root.iter('img')):
-            mutate_image_to_picture(img)
+        # for img in list(root.iter('img')):
+        #     mutate_image_to_picture(img)
         mutate_image_to_picture(primary_image)
 
         instance = cls(slug, root, metadata=metadata, primary_image=primary_image)
