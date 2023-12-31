@@ -33,6 +33,7 @@ def copy_or_convert(source: Path, target: Path, source_mimetype: str, target_mim
     if source_mimetype == target_mimetype:
         logging.info('%s -> %s', source, target)
         shutil.copyfile(source, target)
+        return
     source_kind = source_mimetype.split('/')[0]
     target_kind = target_mimetype.split('/')[0]
     if source_kind != target_kind:
