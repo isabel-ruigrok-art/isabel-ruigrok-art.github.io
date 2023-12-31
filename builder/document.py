@@ -144,7 +144,7 @@ class Document:
         document_metadata = getattr(markdown_parser, 'Meta', None) or {}
         cls.transform_document_metadata(document_metadata)
         metadata = {**default_metadata, **document_metadata, **metadata_overrides}
-        root = ET.fromstring(''.join(('<html>', inner_html, '</html>')))
+        root = ET.fromstring(f'<html>{inner_html}</html>')
         # deep copy to avoid problems with double-rewriting urls.
         primary_image = copy.deepcopy(identify_primary_image(root))
         # for img in list(root.iter('img')):
@@ -184,9 +184,11 @@ class Document:
                 value = cls.METADATA_TRANSFORMERS[key](value)
             metadata[key] = value
 
-    def iter_img_srcs(self) -> Iterable[str]:
+    def iter_img_srcs(self, root: ET.Element = None) -> Iterable[str]:
         """ iterate over all image urls referenced in the document. """
-        for el in self.root.iter():
+        if root is None:
+            root = self.root
+        for el in root.iter():
             if src := el.get('src'):
                 yield src
             if srcset := el.get('srcset'):
@@ -194,4 +196,10 @@ class Document:
 
     def iter_dependencies(self) -> Iterable[urllib.parse.SplitResult]:
         """ iterate over all local image urls referenced in the document. """
-        return (url for src in self.iter_img_srcs() if not (url := urllib.parse.urlsplit(src)).netloc)
+        yield from (url for src in self.iter_img_srcs() if not (url := urllib.parse.urlsplit(src)).netloc)
+        # FIXME: gallery item dependencies should be separate. Also why do we yield SplitResult here?
+        if self.primary_image:
+            for src in self.iter_img_srcs(root=self.primary_image):
+                if (url := urllib.parse.urlsplit(src)).netloc:
+                    continue
+                yield url._replace(path=str(Path(url.path).with_suffix('.webp')))
