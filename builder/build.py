@@ -110,7 +110,7 @@ def sync_static_path(src: Path) -> Path:
     elif src.is_dir():
         if not dst.exists():
             try:
-                os.symlink(src, dst, target_is_directory=True)
+                shutil.copytree(src, dst, copy_function=os.link)
                 logging.info('%s => %s', src, dst)
             except OSError:
                 shutil.copytree(src, dst)
