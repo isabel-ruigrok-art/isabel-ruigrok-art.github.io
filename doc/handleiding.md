@@ -470,11 +470,6 @@ Nu kun je de site herbouwen door `Ctrl + Shift + B` in te drukken.
 
 ### Uploaden
 
-Hoewel je in principe de server die je op je eigen computer startte openbaar kunt maken, is het makkelijker, goedkoper en veiliger om iemand anders' servers te gebruiken.
-
-Om de site te uploaden naar Google's App Engine servers, moet je de [Google Cloud CLI installeren](https://cloud.google.com/sdk/docs/install) [^1].
-Nu gebruik je simpelweg `gcloud app deploy` om de (veranderde) bestanden te uploaden en servers over te schakelen naar de nieuwe versie.
-De eerste keer wordt om je google-inloggegevens en de naam van het project gevraagd.
-Welke bestanden worden geupload en hoe ze aan urls worden gekoppeld, wordt vastgelegd in het bestand `app.yaml`; hier hoef je waarschijnlijk niets aan te veranderen.
-
-[^1]: Als je installeren te veel gedoe vindt, kun je ook de google cloud shell gebruiken via je webbrowser. Dit is een virtuele linux-machine waar Python en de GCloud-CLI al geïnstalleerd zijn.
+De site wordt gehost met GitHub pages.
+Veranderingen op de `main` branch worden automatisch verwerkt tot een nieuwe versie van de site met GitHub Actions.
+'✔️ 2/2' naast een commit geeft aan dat deze versie successvol gebouwd en geupoad is.
