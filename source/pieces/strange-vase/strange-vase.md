@@ -3,7 +3,6 @@
 
 Acrylic on Canvas.  
 50cm × 40cm.  
-150 €
 
 A humanly vase formed in a wild landscape.
 
