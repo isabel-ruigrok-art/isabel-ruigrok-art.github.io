@@ -1,12 +1,13 @@
-My name is Isabel Ruigrok and I am an artist based in The Netherlands.
-I am eighteen years old and currently in my second year of studying at HKU Fine Art.
+Ik bied de toeschouwer mijn wereld vanuit mijn gedachten en alles wat ik mij kan verbeelden.
+Dit laat ik zien door middel van verschillende media: schilderijen, sculpturen en performances.
+De essentie van mijn werk is om mensen te raken met mijn kunst. 
+Dat kan zijn via de overrompelendheid van chaos of de harmonie en rust in een beeld. 
+Ik hoop een connectie te bieden tussen mijn kunst en het persoonlijke gevoel van de toeschouwers.
 
-I like painting with loose dancing brush strokes and imagining the world of the painting I'm working on.
-I like when things have stories, and where craftsmanship tells them.
+Inspiratie vind ik via beeldfragmenten uit mijn dagelijks leven en via mijn fascinatie voor de complexe verhouding tussen mens en natuur.
+De thematiek die terugkomt in mijn kunstwerken is: spontaniteit, emoties, interacties tussen individuen, verhalen, rituelen en de natuur.
 
-I see Nature as something above me, as it can reflect the ancient times I've never lived.
-I love to incorporate this feeling in my work through dramatic landscapes and clothing or figures from other time periods.
+Ik vind het belangrijk dat de menselijke bewerking zichtbaar is in mijn kunstwerken; voor mij geeft het vorm en waarde aan mijn gekozen materiaal.
+Daarom gebruik ik graag verschillende ambachten zoals: beeldhouwen, smeden, glas bewerken en schilderen.
 
-This summer I won pre-selections for Kunstbende South Holland, an art event for young creators.
-This means I will be exhibiting my work at the Kunstbende finals on 30 september 2023 at De Melkweg in Amsterdam.
-You can buy your tickets to see me and my work [here](https://shop.ikbenaanwezig.nl/tickets/event/kunstbende-young-creators-festival-2-30-09-2023).
+Isabel Ruigrok
