@@ -3,7 +3,9 @@
         <figure class="{{ 'wide' if wide else 'tall' }}">
             {{ picture }}
             <figcaption>
+                {% if title %}
                 <h3>{{ title | morebreaks }}</h3>
+                {% endif %}
                 {% if properties %}
                     <ul>
                         {% for property in properties -%}
