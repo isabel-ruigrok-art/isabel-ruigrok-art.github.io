@@ -4,7 +4,6 @@
 
 Acrylic paint on canvas.  
 50cm × 40cm.  
-120 €
 
 A window that divides the two dimensions.
 
