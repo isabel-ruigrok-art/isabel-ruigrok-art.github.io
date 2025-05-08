@@ -1,14 +1,13 @@
-Als kunstenaar ben ik een tijdreiziger die inspiratie uit het verleden meeneemt naar ons huidige leven.
-Met mijn kunst haal ik elementen uit de eeuwenoude spiritualiteit, kennis en ambachten.
-De thematiek die terugkomt in mijn schilderijen en sculpturen zijn: mythes, bijbelse verhalen, natuur en dromen.
+Ik bied de toeschouwer mijn wereld vanuit mijn gedachten en alles wat ik mij kan verbeelden.
+Dit laat ik zien door middel van verschillende media: schilderijen, sculpturen en performances.
+De essentie van mijn werk is om mensen te raken met mijn kunst. 
+Dat kan zijn via de overrompelendheid van chaos of de harmonie en rust in een beeld. 
+Ik hoop een connectie te bieden tussen mijn kunst en het persoonlijke gevoel van de toeschouwers.
 
-Ik schilder graag met losse, dansende penseelstreken en beeld me de wereld van het schilderij in waar ik aan werk. 
-Ik vind het belangrijk dat dingen verhalen krijgen en dat vakmanschap ze vertelt. 
+Inspiratie vind ik via beeldfragmenten uit mijn dagelijks leven en via mijn fascinatie voor de complexe verhouding tussen mens en natuur.
+De thematiek die terugkomt in mijn kunstwerken is: spontaniteit, emoties, interacties tussen individuen, verhalen, rituelen en de natuur.
 
-Via schilderijen en sculpturen wil ik de toeschouwer verhalen vertellen die ik zelf niet kan verwoorden.
-Verhalen gebaseerd op mythes, bijbelse verhalen, of mijn eigen dromen en verlangens.
-Ik ben gefascineerd met de mens in verhouding met de natuur, en met ons leven in verhouding tot elkaar. Kunst is voor mij een middel wat ik bijna als heilig beschouw. 
-Waarbij ik als kunstenaar volledig wordt bestuurd door deze energie die wij inspiratie/passie noemen. 
-Mijn ideeën zijn niet meer mijn eigen en mijn handen lijken niet meer de mijne. Bestuurd door iets wat ik niet kan vatten, behalve het resultaat, het kunstwerk, is er niks van bewijs.
+Ik vind het belangrijk dat de menselijke bewerking zichtbaar is in mijn kunstwerken; voor mij geeft het vorm en waarde aan mijn gekozen materiaal.
+Daarom gebruik ik graag verschillende ambachten zoals: beeldhouwen, smeden, glas bewerken en schilderen.
 
 Isabel Ruigrok
